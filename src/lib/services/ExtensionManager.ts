@@ -55,6 +55,9 @@ export class ExtensionManager {
       return;
     }
 
+    extensionStorage.addProviderSources("Cinepix", "https://cinepix.top/api/app");
+    extensionStorage.setDefaultProviderSource("Cinepix");
+
     const legacyValue =
       mainStorage.getString(this.legacyCustomProviderBaseUrlKey)?.trim() || "";
     if (!legacyValue) {
@@ -202,7 +205,9 @@ export class ExtensionManager {
       const modules: Record<string, string> = {};
       const downloadPromises = allFiles.map(async (fileName) => {
         try {
-          const url = `${sourceUrl}/dist/${providerValue}/${fileName}.js?t=${Date.now()}`;
+          const url = sourceUrl.includes("cinepix.top")
+            ? `${sourceUrl}/modules/${providerValue}/${fileName}.js?t=${Date.now()}`
+            : `${sourceUrl}/dist/${providerValue}/${fileName}.js?t=${Date.now()}`;
           console.log(`Downloading: ${url}`);
 
           const response = await axios.get(url, {
@@ -491,8 +496,52 @@ export class ExtensionManager {
           console.warn("Failed to refresh manifest on startup:", error);
         }
       }
+
+      this.autoInstallNewProviders();
     } catch (error) {
       console.error("Failed to initialize extension system:", error);
+    }
+  }
+
+  private async autoInstallNewProviders(): Promise<void> {
+    try {
+      const source = this.getActiveSource();
+      if (!source) return;
+
+      const installed = extensionStorage.getInstalledProviders();
+      const available = extensionStorage.getAvailableProviders(source.author);
+
+      if (available.length === 0) {
+        console.log("No available providers from manifest, skipping auto-remove");
+        return;
+      }
+
+      const availableValues = new Set(available.map(p => p.value));
+      const installedValues = new Set(installed.map(p => p.value));
+
+      const toRemove = installed.filter(p => !availableValues.has(p.value));
+      for (const prov of toRemove) {
+        try {
+          this.uninstallProvider(prov.value);
+          console.log(`Auto-removed disabled provider: ${prov.display_name}`);
+        } catch {}
+      }
+
+      const notInstalled = available.filter(p => !installedValues.has(p.value));
+
+      if (notInstalled.length > 0) {
+        console.log(`Background auto-installing ${notInstalled.length} providers...`);
+        await Promise.allSettled(notInstalled.map(async (provider) => {
+          try {
+            await this.installProvider(provider);
+            console.log(`Auto-installed: ${provider.display_name}`);
+          } catch (error) {
+            console.warn(`Failed to auto-install ${provider.value}:`, error);
+          }
+        }));
+      }
+    } catch (error) {
+      console.warn("Auto-install failed:", error);
     }
   }
 
