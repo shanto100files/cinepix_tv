@@ -87,8 +87,8 @@ jobs:
           releaseName: "Vega v__VERSION__"
           releaseBody: "Automated release of Vega."
           releaseDraft: true
-          includeUpdaterJson: true
-          args: ${{ matrix.platform == 'macos-latest' && '--target universal-apple-darwin' || matrix.platform == 'windows-latest' && '--bundles nsis' || '' }}
+          includeUpdaterJson: ${{ secrets.TAURI_PRIVATE_KEY != '' }}
+          args: ${{ matrix.platform == 'macos-latest' && '--target universal-apple-darwin' || matrix.platform == 'windows-latest' && '--bundles nsis' || '' }}${{ secrets.TAURI_PRIVATE_KEY == '' && ' --config bundle.createUpdaterArtifacts=false' || '' }}
 
       - name: Build MSIX (Windows only)
         if: matrix.platform == 'windows-latest'
@@ -221,6 +221,13 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "No keystore secret found, skipping signing"
+            UNSIGNED_APK=$(find src-tauri/gen/android/app/build/outputs/apk -name "*-unsigned.apk" | xargs ls -S | head -n 1)
+            cp "$UNSIGNED_APK" vega-tv-android.apk
+            exit 0
+          fi
+
           # 1. Decode Keystore
           echo "$KEYSTORE_BASE64" | base64 --decode > release.jks
 
