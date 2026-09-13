@@ -24,6 +24,7 @@ export interface ProviderExtension {
   installedAt?: number;
   lastUpdated?: number;
   hasSettings?: boolean;
+  show_on_home?: boolean;
 }
 
 /**

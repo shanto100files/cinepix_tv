@@ -164,6 +164,7 @@ export class ExtensionManager {
         type: item.type || "global",
         installed: false,
         hasSettings: item.hasSettings || false,
+        show_on_home: item.show_on_home,
       }));
 
       // Cache the manifest

@@ -13,6 +13,8 @@ export interface Content {
   setAvailableProviders: (providers: ProviderExtension[]) => void;
   activeExtensionProvider: ProviderExtension | null;
   setActiveExtensionProvider: (provider: ProviderExtension | null) => void;
+  homeProviderValue: string;
+  setHomeProviderValue: (value: string) => void;
 }
 
 const useContentStore = create<Content>()(
@@ -35,6 +37,7 @@ const useContentStore = create<Content>()(
         .sort((a, b) => a.display_name.localeCompare(b.display_name)),
       availableProviders: [],
       activeExtensionProvider: null,
+      homeProviderValue: localStorage.getItem('homeProviderValue') || '',
 
       setProvider: (provider: ProviderExtension) => set({provider}),
 
@@ -50,6 +53,11 @@ const useContentStore = create<Content>()(
 
       setActiveExtensionProvider: (provider: ProviderExtension | null) =>
         set({activeExtensionProvider: provider}),
+
+      setHomeProviderValue: (value: string) => {
+        localStorage.setItem('homeProviderValue', value);
+        set({homeProviderValue: value});
+      },
     }),
     {
       name: 'content-storage',
@@ -57,6 +65,7 @@ const useContentStore = create<Content>()(
       partialize: state => ({
         provider: state.provider,
         activeExtensionProvider: state.activeExtensionProvider,
+        homeProviderValue: state.homeProviderValue,
       }),
     },
   ),

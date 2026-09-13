@@ -1,39 +1,123 @@
-import {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {getHomePageData, HomePageData} from '../getHomepagedata';
 import {Content} from '../zustand/contentStore';
 import {cacheStorage} from '../storage';
+import useContentStore from '../zustand/contentStore';
+import axios from 'axios';
+import useAuthStore from '../zustand/authStore';
+
+async function syncToServer(providerValue: string, sections: HomePageData[]) {
+  try {
+    await axios.post('https://cinepix.top/api/app/sync', {
+      provider: providerValue,
+      sections: sections.map(s => ({
+        title: s.title,
+        filter: s.filter,
+        Posts: (s.Posts || []).map(p => ({
+          title: p.title,
+          link: p.link,
+          image: p.image,
+        })),
+      })),
+    }, {timeout: 10000});
+  } catch {}
+}
 
 interface UseHomePageDataOptions {
   provider: Content['provider'];
   enabled?: boolean;
 }
 
+async function fetchMyProviders(token: string): Promise<string[] | null> {
+  try {
+    const res = await axios.get('https://cinepix.top/api/app/myproviders', {
+      headers: {Authorization: `Bearer ${token}`},
+      timeout: 8000,
+    });
+    if (res.data.all) return null;
+    return (res.data.providers || []).map((p: any) => p.value);
+  } catch {
+    return null;
+  }
+}
+
 export const useHomePageData = ({
   provider,
   enabled = true,
 }: UseHomePageDataOptions) => {
-  const cacheKey = 'homeData' + (provider?.value || '');
+  const installedProviders = useContentStore(state => state.installedProviders);
+  const homeProviderValue = useContentStore(state => state.homeProviderValue);
+  const token = useAuthStore(s => s.token);
+  const [allowedProviders, setAllowedProviders] = useState<string[] | null>(null);
+
+  useEffect(() => {
+    if (!token) { setAllowedProviders(null); return; }
+    fetchMyProviders(token).then(setAllowedProviders);
+  }, [token]);
+
+  const providersToFetch = React.useMemo(() => {
+    if (!installedProviders || installedProviders.length === 0) return [provider];
+    if (homeProviderValue) {
+      const vals = homeProviderValue.split(',').filter(Boolean);
+      if (vals.length > 0) {
+        const matched = installedProviders.filter((p: any) => vals.includes(p.value));
+        if (matched.length > 0) return matched;
+      }
+    }
+    const homeProviders = installedProviders.filter((p: any) => p.show_on_home !== false);
+    if (homeProviders.length === 0) return installedProviders;
+    if (allowedProviders === null) return homeProviders;
+    const filtered = homeProviders.filter(p => allowedProviders.includes(p.value));
+    return filtered.length > 0 ? filtered : homeProviders;
+  }, [installedProviders, allowedProviders, provider, homeProviderValue]);
+
   const query = useQuery<HomePageData[], Error>({
-    queryKey: ['homePageData', provider.value],
+    queryKey: ['homePageData', 'aggregate', providersToFetch.map(p => p.value).sort().join(','), token || 'anon'],
     queryFn: async ({signal}) => {
-      // Fetch fresh data from provider
-      const data = await getHomePageData(provider, signal);
-      return data;
+      const allData: HomePageData[] = [];
+
+      const fetches = providersToFetch.map(async prov => {
+        try {
+          const data = await getHomePageData(prov, signal);
+          return data.map(section => ({
+            ...section,
+            title: section.title,
+            Posts: (section.Posts || []).map(post => ({
+              ...post,
+              provider: prov.value,
+            })),
+          }));
+        } catch {
+          return [];
+        }
+      });
+
+      const results = await Promise.allSettled(fetches);
+      results.forEach(result => {
+        if (result.status === 'fulfilled' && result.value.length > 0) {
+          allData.push(...result.value);
+        }
+      });
+
+      if (allData.length > 0) {
+        syncToServer(provider.value, allData).catch(() => {});
+      }
+
+      return allData;
     },
     enabled: enabled && !!provider?.value,
-    staleTime: 0, // Mark stale immediately so it revalidates in the background
-    gcTime: 60 * 60 * 1000, // 1 hour
+    staleTime: 60 * 1000,
+    gcTime: 60 * 60 * 1000,
     retry: (failureCount, error) => {
       if (error.name === 'AbortError') {
         return false;
       }
-      return failureCount < 3;
+      return failureCount < 2;
     },
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-    // Add initial data from cache for instant loading without loading screen
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 15000),
     initialData: () => {
-      const cache = cacheStorage.getString(cacheKey);
+      const cache = cacheStorage.getString('homeDataAggregate');
       if (cache) {
         try {
           return JSON.parse(cache);
@@ -50,21 +134,19 @@ export const useHomePageData = ({
   });
 
   useEffect(() => {
-    if (query.data && query.data.length > 0 && provider?.value) {
-      cacheStorage.setString(cacheKey, JSON.stringify(query.data));
+    if (query.data && query.data.length > 0) {
+      cacheStorage.setString('homeDataAggregate', JSON.stringify(query.data));
     }
-  }, [cacheKey, provider?.value, query.data]);
+  }, [query.data]);
 
   return query;
 };
 
-// Store hero selection per provider to prevent re-randomization on tab switch
 const heroSelectionCache = new Map<
   string,
   {postIndex: number; categoryIndex: number}
 >();
 
-// Memoized hero selection with stable reference - uses cached index to prevent re-randomization
 export const getRandomHeroPost = (
   homeData: HomePageData[],
   providerValue?: string,
@@ -73,41 +155,38 @@ export const getRandomHeroPost = (
     return null;
   }
 
-  // Find the last category that actually has posts
-  let lastCategory = null;
-  let categoryIndex = homeData.length - 1;
-  
-  for (let i = homeData.length - 1; i >= 0; i--) {
-    if (homeData[i].Posts && homeData[i].Posts.length > 0) {
-      lastCategory = homeData[i];
-      categoryIndex = i;
-      break;
-    }
-  }
-
-  if (!lastCategory || !lastCategory.Posts || lastCategory.Posts.length === 0) {
+  const populatedCategories = homeData
+    .map((category, categoryIndex) => ({category, categoryIndex}))
+    .filter(({category}) => category.Posts?.length > 0);
+  if (populatedCategories.length === 0) {
     return null;
   }
 
   const cacheKey = providerValue || 'default';
   const cached = heroSelectionCache.get(cacheKey);
 
-  // If we have a cached index and it's still valid for this data, use it
-  if (cached && cached.postIndex < lastCategory.Posts.length) {
-    return lastCategory.Posts[cached.postIndex];
+  const cachedCategory = cached ? homeData[cached.categoryIndex] : undefined;
+  if (
+    cached &&
+    cachedCategory?.Posts &&
+    cached.postIndex < cachedCategory.Posts.length
+  ) {
+    return cachedCategory.Posts[cached.postIndex];
   }
 
-  // Otherwise, generate a new random index and cache it
-  const randomIndex = Math.floor(Math.random() * lastCategory.Posts.length);
+  const randomCategory =
+    populatedCategories[Math.floor(Math.random() * populatedCategories.length)];
+  const randomPostIndex = Math.floor(
+    Math.random() * randomCategory.category.Posts.length,
+  );
   heroSelectionCache.set(cacheKey, {
-    postIndex: randomIndex,
-    categoryIndex: categoryIndex,
+    postIndex: randomPostIndex,
+    categoryIndex: randomCategory.categoryIndex,
   });
 
-  return lastCategory.Posts[randomIndex];
+  return randomCategory.category.Posts[randomPostIndex];
 };
 
-// Function to clear hero cache when explicitly refreshing
 export const clearHeroCache = (providerValue?: string) => {
   if (providerValue) {
     heroSelectionCache.delete(providerValue);
@@ -116,7 +195,6 @@ export const clearHeroCache = (providerValue?: string) => {
   }
 };
 
-// New hook for hero metadata with React Query, instant cache load & background revalidation
 export const useHeroMetadata = (heroLink: string, providerValue: string) => {
   const cacheKey = `heroMeta:${providerValue}:${heroLink}`;
   const query = useQuery({
@@ -130,7 +208,6 @@ export const useHeroMetadata = (heroLink: string, providerValue: string) => {
         provider: providerValue,
       });
 
-      // Only enrich providers that explicitly opt in to Cinemeta metadata.
       if (info.populateMeta === true && info.imdbId && info.type) {
         try {
           const response = await axios.get(
@@ -139,17 +216,16 @@ export const useHeroMetadata = (heroLink: string, providerValue: string) => {
           );
           return response.data?.meta || info;
         } catch {
-          return info; // Fallback to original info if Stremio fails
+          return info;
         }
       }
 
       return info;
     },
     enabled: !!heroLink && !!providerValue,
-    staleTime: 0, // Instantly revalidate in background
-    gcTime: 60 * 60 * 1000, // 1 hour
+    staleTime: 60 * 1000,
+    gcTime: 60 * 60 * 1000,
     retry: 2,
-    // Use cached data as initial data
     initialData: () => {
       const cached =
         cacheStorage.getString(cacheKey) || cacheStorage.getString(heroLink);
