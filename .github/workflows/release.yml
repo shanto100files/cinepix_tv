@@ -116,7 +116,7 @@ jobs:
             exit 1
           fi
           TAG="app-v${{ steps.version.outputs.app_version }}"
-          gh release create "$TAG" "${installers[@]}" --title "$TAG" --draft=true --clobber || true
+          gh release create "$TAG" "${installers[@]}" --title "$TAG" --draft=true || true
           gh release upload "$TAG" "${installers[@]}" --clobber
   release-android:
     permissions:
@@ -254,5 +254,5 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="app-v${{ steps.version.outputs.app_version }}"
-          gh release create "$TAG" vega-tv-android.apk --title "$TAG" --draft=true --clobber || true
+          gh release create "$TAG" vega-tv-android.apk --title "$TAG" --draft=true || true
           gh release upload "$TAG" vega-tv-android.apk --clobber
