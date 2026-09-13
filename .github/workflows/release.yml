@@ -88,7 +88,7 @@ jobs:
           releaseBody: "Automated release of Vega."
           releaseDraft: true
           includeUpdaterJson: ${{ secrets.TAURI_PRIVATE_KEY != '' }}
-          args: ${{ matrix.platform == 'macos-latest' && '--target universal-apple-darwin' || matrix.platform == 'windows-latest' && '--bundles nsis' || '' }}${{ secrets.TAURI_PRIVATE_KEY == '' && ' --config bundle.createUpdaterArtifacts=false' || '' }}
+          args: --config bundle.createUpdaterArtifacts=${{ secrets.TAURI_PRIVATE_KEY != '' }} ${{ matrix.platform == 'macos-latest' && '--target universal-apple-darwin' || matrix.platform == 'windows-latest' && '--bundles nsis' || '' }}
 
       - name: Build MSIX (Windows only)
         if: matrix.platform == 'windows-latest'
