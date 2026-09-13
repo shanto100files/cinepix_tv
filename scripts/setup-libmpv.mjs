@@ -46,16 +46,33 @@ if (process.platform === "win32" && !existsSync(vcRedistPath)) {
     "[setup-lib] Downloading Microsoft Visual C++ Redistributable...",
   );
   mkdirSync(windowsResourcesDir, { recursive: true });
-  const response = await fetch(vcRedistUrl);
-  if (!response.ok) {
-    throw new Error(
-      `Failed to download Visual C++ Redistributable: ${response.status}`,
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 120000);
+    const response = await fetch(vcRedistUrl, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (!response.ok) {
+      console.warn(
+        `[setup-lib] Failed to download VC++ Redistributable: ${response.status} (skipping)`,
+      );
+    } else {
+      writeFileSync(vcRedistPath, Buffer.from(await response.arrayBuffer()));
+      console.log("[setup-lib] VC++ Redistributable downloaded successfully");
+    }
+  } catch (e) {
+    console.warn(
+      `[setup-lib] VC++ Redistributable download failed: ${e.message} (skipping)`,
     );
   }
-  writeFileSync(vcRedistPath, Buffer.from(await response.arrayBuffer()));
 }
 
-execSync("npx tauri-plugin-libmpv-api setup-lib", {
-  stdio: "inherit",
-  cwd: rootDir,
-});
+try {
+  execSync("npx tauri-plugin-libmpv-api setup-lib", {
+    stdio: "inherit",
+    cwd: rootDir,
+  });
+} catch (e) {
+  console.warn(
+    `[setup-lib] tauri-plugin-libmpv-api setup-lib failed: ${e.message} (skipping)`,
+  );
+}
