@@ -13,6 +13,8 @@ import useWatchHistoryStore from "../lib/zustand/watchHistrory";
 import { FocusableButton } from "../components/layout/FocusableButton";
 import { PostCardItem } from "../components/home/PostCardItem";
 import { Spinner } from "../components/ui/spinner";
+import { AdBox } from "../components/ui/AdBox";
+import useAdStore from "../lib/zustand/adStore";
 import "./HomePage.css";
 import "../pages/SearchPage.css";
 
@@ -102,7 +104,7 @@ export const HomePage: React.FC = () => {
   if (!installedProviders || installedProviders.length === 0) {
     return (
       <div className="empty-state">
-        <h2 className="headline-lg">Welcome to Vega</h2>
+        <h2 className="headline-lg">Welcome to Cinepix</h2>
         <p className="body-lg text-muted">
           Please install an extension to get started.
         </p>
@@ -230,6 +232,7 @@ export const HomePage: React.FC = () => {
             providerValue={provider?.value}
           />
         ))}
+        <AdBox url={useAdStore.getState().ads.bottom} />
       </div>
     </div>
   );

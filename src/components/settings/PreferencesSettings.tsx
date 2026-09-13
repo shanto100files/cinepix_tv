@@ -160,7 +160,7 @@ export const PreferencesSettings: React.FC = () => {
             {isAndroid
               ? "Internal App Storage (Recommended for Android)"
               : downloadLocation === "vega"
-                ? "Default (Documents/VegaDownloads)"
+                ? "Default (Documents/CinepixDownloads)"
                 : downloadLocation}
           </p>
         </div>
@@ -223,7 +223,7 @@ export const PreferencesSettings: React.FC = () => {
         <div className="settings-info">
           <h3 className="label-lg">Auto Install App Updates</h3>
           <p className="body-md text-muted">
-            Automatically download and install new versions of Vega
+            Automatically download and install new versions of Cinepix
           </p>
         </div>
         <Switch

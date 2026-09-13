@@ -1,5 +1,9 @@
 import { create } from "zustand";
 import { WatchHistoryItem, watchHistoryStorage } from "../storage";
+import useAuthStore from "./authStore";
+
+const API_BASE = "https://cinepix.top/api/app";
+const HARDCODED_KEY = "78a0e573dfd894d443685159b2e71e2f";
 
 export interface History {
   history: WatchHistoryItem[];
@@ -11,9 +15,73 @@ export interface History {
   clearHistory: () => void;
   updateItemWithInfo: (link: string, infoData: any) => void;
   removeItem: (item: WatchHistoryItem) => void;
+  syncWithServer: () => Promise<void>;
 }
 
-// Helper function to convert between our storage format and zustand format
+async function serverSyncItem(item: WatchHistoryItem) {
+  const token = useAuthStore.getState().token;
+  if (!token) return;
+  try {
+    await fetch(`${API_BASE}/history`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        "X-App-Key": HARDCODED_KEY,
+      },
+      body: JSON.stringify({
+        provider: item.provider || "",
+        link: item.link || "",
+        title: item.title || "",
+        image: item.poster || "",
+        episode_link: item.episode?.link || "",
+        episode_title: item.episodeTitle || "",
+        season_num: item.episode?.season || 1,
+        episode_num: item.episode?.episode || 1,
+        progress_seconds: Math.floor(item.progress || 0),
+        duration_seconds: Math.floor(item.duration || 0),
+      }),
+    });
+  } catch {}
+}
+
+async function serverFetchHistory(): Promise<WatchHistoryItem[]> {
+  const token = useAuthStore.getState().token;
+  if (!token) return [];
+  try {
+    const res = await fetch(`${API_BASE}/history`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "X-App-Key": HARDCODED_KEY,
+      },
+    });
+    const data = await res.json();
+    return (data.items || []).map((r: any) => ({
+      id: `${r.provider_value}:${r.post_link}:${r.season_num}:${r.episode_num}`,
+      title: r.post_title || "",
+      poster: r.post_image || "",
+      provider: r.provider_value || "",
+      link: r.post_link || "",
+      timestamp: new Date(r.updated_at).getTime() || Date.now(),
+      episodeTitle: r.episode_title || "",
+      episode: {
+        link: r.episode_link || "",
+        episode: r.episode_num || 1,
+        season: r.season_num || 1,
+        title: r.episode_title || "",
+      },
+      type: "series",
+      isSeries: true,
+      progress: r.progress_seconds || 0,
+      duration: r.duration_seconds || 0,
+      lastPlayed: new Date(r.updated_at).getTime() || Date.now(),
+      currentTime: r.progress_seconds || 0,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 const convertStorageToZustand = (items: any[]): WatchHistoryItem[] => {
   return items.map((item) => ({
     ...item,
@@ -62,6 +130,8 @@ const useWatchHistoryStore = create<History>((set) => ({
       set({
         history: convertStorageToZustand(watchHistoryStorage.getWatchHistory()),
       });
+
+      serverSyncItem(storageItem);
     } catch (error) {
       console.error("❌ Error:", error);
     }
@@ -85,6 +155,7 @@ const useWatchHistoryStore = create<History>((set) => ({
         };
 
         watchHistoryStorage.addToWatchHistory(updatedItem);
+        serverSyncItem(updatedItem);
       }
 
       set({
@@ -127,6 +198,37 @@ const useWatchHistoryStore = create<History>((set) => ({
     } catch (error) {
       console.error("❌ Error caching info data:", error);
     }
+  },
+
+  syncWithServer: async () => {
+    const token = useAuthStore.getState().token;
+    if (!token) return;
+    try {
+      const serverItems = await serverFetchHistory();
+      if (serverItems.length === 0) return;
+
+      const localHistory = watchHistoryStorage.getWatchHistory();
+      const localIds = new Set(localHistory.map((i) => i.id || i.link));
+      const merged = [...localHistory];
+
+      for (const si of serverItems) {
+        const siId = si.id || si.link;
+        if (!localIds.has(siId)) {
+          merged.push(si);
+        }
+      }
+
+      merged
+        .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+        .slice(0, 50)
+        .forEach((item) => {
+          watchHistoryStorage.addToWatchHistory(item);
+        });
+
+      set({
+        history: convertStorageToZustand(watchHistoryStorage.getWatchHistory()),
+      });
+    } catch {}
   },
 }));
 

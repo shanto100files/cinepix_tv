@@ -1,6 +1,6 @@
-import React from "react";
-import { LuMenu as Menu } from "react-icons/lu";
-import { useLocation } from "react-router-dom";
+﻿import React from "react";
+import { LuMenu as Menu, LuUser as UserIcon } from "react-icons/lu";
+import { useLocation, useNavigate } from "react-router-dom";
 import { FocusableNavLink } from "./FocusableNavLink";
 import { AnimatedNavIcon, type AnimatedNavIconName } from "./AnimatedNavIcon";
 import { FocusableButton } from "./FocusableButton";
@@ -9,6 +9,7 @@ import {
   FocusContext,
 } from "@noriginmedia/norigin-spatial-navigation-react";
 import { settingsStorage } from "../../lib/storage";
+import useAuthStore from "../../lib/zustand/authStore";
 import "./Sidebar.css";
 
 type NavigationDestinationConfig = {
@@ -70,7 +71,9 @@ const NavigationDestination = ({
 
 export const Sidebar: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const tvMode = settingsStorage.isTvModeEnabled();
+  const user = useAuthStore((s) => s.user);
   const [collapsed, setCollapsed] = React.useState(() =>
     localStorage.getItem("vegaSidebarCollapsed") === "true",
   );
@@ -118,9 +121,9 @@ export const Sidebar: React.FC = () => {
           >
             <Menu size={26} />
           </FocusableButton>
-          <div className="sidebar-logo" aria-label="Vega">
+          <div className="sidebar-logo" aria-label="Cinepix">
             <span className="sidebar-brand-icon" aria-hidden="true" />
-            <span className="sidebar-brand-name">Vega</span>
+            <span className="sidebar-brand-name">Cinepix</span>
           </div>
         </div>
 
@@ -147,6 +150,22 @@ export const Sidebar: React.FC = () => {
             ))}
           </div>
         </nav>
+
+        {user && (
+          <div className="sidebar-user" onClick={() => navigate("/profile")}>
+            <div className="sidebar-user-avatar">
+              {user.username?.[0]?.toUpperCase() || <UserIcon size={16} />}
+            </div>
+            {!collapsed && (
+              <div className="sidebar-user-info">
+                <span className="sidebar-user-name">{user.username}</span>
+                <span className="sidebar-user-status">
+                  {user.premium ? "Premium" : "Free"}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
       </aside>
     </FocusContext.Provider>
   );

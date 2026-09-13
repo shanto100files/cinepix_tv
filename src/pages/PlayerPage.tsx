@@ -621,7 +621,7 @@ const TvPlayer: React.FC<any> = ({
                 {isAndroid
                   ? useExternalPlayer
                     ? "Open in external player"
-                    : "Play in Vega"
+                    : "Play in Cinepix"
                   : "Open in VLC"}
               </span>
               <h1>{state.primaryTitle}</h1>
@@ -636,7 +636,7 @@ const TvPlayer: React.FC<any> = ({
                 {isAndroid && useExternalPlayer
                   ? "Opening app chooser…"
                   : isAndroid
-                    ? "Opening Vega player…"
+                    ? "Opening Cinepix player…"
                     : "Opening VLC…"}
               </span>
             </div>
@@ -1090,7 +1090,7 @@ const DesktopPlayer: React.FC<any> = ({
       state.type === "series"
         ? activeEpisode?.title || state.primaryTitle
         : state.primaryTitle,
-    artist: state.type === "series" ? state.primaryTitle : "Vega",
+    artist: state.type === "series" ? state.primaryTitle : "Cinepix",
     album: state.secondaryTitle,
     artwork: mediaArtwork,
     isPaused: mpv.isPaused,

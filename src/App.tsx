@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { client } from "./lib/client";
@@ -19,6 +19,11 @@ import { DownloadsSeriesPage } from "./pages/DownloadsSeriesPage";
 import { WatchlistPage } from "./pages/WatchlistPage";
 import { CatalogPage } from "./pages/CatalogPage";
 import { SettingsPage } from "./pages/SettingsPage";
+import { LoginPage } from "./pages/LoginPage";
+import { RegisterPage } from "./pages/RegisterPage";
+import { ProfilePage } from "./pages/ProfilePage";
+import { PremiumPage } from "./pages/PremiumPage";
+import { ForceUpdatePage } from "./pages/ForceUpdatePage";
 import { updateProvidersService } from "./lib/services/UpdateProviders";
 import { init as initNavigation } from "@noriginmedia/norigin-spatial-navigation-core";
 import { invoke } from "@tauri-apps/api/core";
@@ -27,6 +32,11 @@ import {
   publishSyncManifest,
   syncFromSharedFolder,
 } from "./lib/sync/syncService";
+import useAuthStore from "./lib/zustand/authStore";
+import { initializeApp, type InitProgress } from "./lib/services/initService";
+import { sendHeartbeat } from "./lib/services/heartbeatService";
+import { initAnalytics, pauseAnalytics, resumeAnalytics, flushBatch } from "./lib/services/analyticsService";
+import useAdStore from "./lib/zustand/adStore";
 
 import { applyThemeTokens } from "./lib/theme";
 import { ToastContainer } from "./components/ui/ToastContainer";
@@ -39,6 +49,69 @@ export default function App() {
 
   const { primary } = useThemeStore();
   const tvMode = settingsStorage.isTvModeEnabled();
+
+  const [appReady, setAppReady] = useState(false);
+  const [initProgress, setInitProgress] = useState<InitProgress>({ progress: 0, status: 'Starting...' });
+  const [appShutdown, setAppShutdown] = useState(false);
+  const [shutdownReason, setShutdownReason] = useState('');
+  const [forceUpdateNeeded, setForceUpdateNeeded] = useState(false);
+
+  const loadToken = useAuthStore(s => s.loadToken);
+  const fetchAds = useAdStore(s => s.fetchAds);
+
+  useEffect(() => {
+    loadToken();
+  }, [loadToken]);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      initializeApp(setInitProgress).then((result) => {
+        if (result.blocked) {
+          setAppShutdown(true);
+          setShutdownReason(result.reason || '');
+        } else if (result.forceUpdate) {
+          setForceUpdateNeeded(true);
+        } else {
+          setAppReady(true);
+        }
+      });
+    }, 500);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    if (!appReady) return;
+    initAnalytics();
+    sendHeartbeat();
+    fetchAds();
+    const hbInterval = setInterval(sendHeartbeat, 5 * 60 * 1000);
+
+    import("./lib/zustand/watchHistrory").then(({ default: store }) => {
+      store.getState().syncWithServer();
+    });
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        resumeAnalytics();
+      } else {
+        pauseAnalytics();
+        flushBatch();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    const handleBeforeUnload = () => {
+      pauseAnalytics();
+      flushBatch();
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      clearInterval(hbInterval);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [appReady]);
 
   useEffect(() => {
     initializeSyncService().catch((error) =>
@@ -104,11 +177,38 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    // Start auto provider updates on boot
     updateProvidersService.startAutomaticUpdateCheck();
-
     applyThemeTokens(primary);
   }, [primary]);
+
+  if (appShutdown) {
+    return (
+      <ForceUpdatePage killSwitchBlocked={true} reason={shutdownReason} />
+    );
+  }
+
+  if (forceUpdateNeeded) {
+    return <ForceUpdatePage />;
+  }
+
+  if (!appReady) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[var(--background)]">
+        <div className="w-64">
+          <div className="text-center mb-6">
+            <h1 className="text-xl font-bold text-[var(--on-surface)]">Cinepix</h1>
+          </div>
+          <div className="w-full h-2 bg-[var(--surface-container-high)] rounded-full overflow-hidden mb-3">
+            <div
+              className="h-full bg-[var(--primary)] rounded-full transition-all duration-500"
+              style={{ width: `${initProgress.progress}%` }}
+            />
+          </div>
+          <p className="text-center text-sm text-[var(--on-surface-variant)]">{initProgress.status}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <QueryClientProvider client={client}>
@@ -117,8 +217,9 @@ export default function App() {
       <BrowserRouter>
         <WindowControls />
         <Routes>
-          {/* Player is outside Layout since it needs fullscreen without sidebar */}
           <Route path="player" element={<PlayerPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route path="/" element={<Layout />}>
             <Route index element={<HomePage />} />
             <Route path="content/:url" element={<MetaPage />} />
@@ -133,6 +234,8 @@ export default function App() {
             />
             <Route path="extensions" element={<ExtensionsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/premium" element={<PremiumPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>

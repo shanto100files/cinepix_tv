@@ -15,6 +15,8 @@ import { DownloadServerDialog } from "../components/DownloadServerDialog";
 import { FocusableButton } from "../components/layout/FocusableButton";
 import { Skeleton } from "../components/ui/skeleton";
 import { useArtworkPalette, useArtworkPaletteReady } from "../lib/hooks/useArtworkPalette";
+import { AdBox } from "../components/ui/AdBox";
+import useAdStore from "../lib/zustand/adStore";
 import { useContentDetails } from "../lib/hooks/useContentInfo";
 import { useEpisodes } from "../lib/hooks/useEpisodes";
 import type { EpisodeLink, Link, Stream, SkipInterval } from "../lib/providers/types";
@@ -524,6 +526,7 @@ export const MetaPage: React.FC = () => {
         />
 
         <div className="content-detail-inner">
+          <AdBox url={useAdStore.getState().ads.top} height={80} />
           <ContentOverview
             description={description}
             providerName={providerName}

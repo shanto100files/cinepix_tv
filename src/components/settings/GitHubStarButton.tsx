@@ -28,8 +28,8 @@ export const GitHubStarButton: React.FC = () => {
     <FocusableButton
       className={`github-star-btn ${celebrating ? "is-celebrating" : ""}`}
       onClick={handleClick}
-      title="Star Vega on GitHub"
-      aria-label="Star Vega on GitHub"
+      title="Star Cinepix on GitHub"
+      aria-label="Star Cinepix on GitHub"
     >
       <span className="github-star-icon" aria-hidden="true">
         <GitHub size={22} />
@@ -43,7 +43,7 @@ export const GitHubStarButton: React.FC = () => {
           ))}
         </span>
       </span>
-      <span>{celebrating ? "You are a star!" : "Star Vega on GitHub"}</span>
+      <span>{celebrating ? "You are a star!" : "Star Cinepix on GitHub"}</span>
       <ExternalLink
         className="github-star-external"
         size={18}
