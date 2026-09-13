@@ -33,6 +33,8 @@ export interface WatchHistoryItem {
     sourceLink?: string;
     description?: string;
     image?: string;
+    season?: number;
+    episode?: number;
   };
   type?: string;
   cachedInfoData?: any; // Add cached info data

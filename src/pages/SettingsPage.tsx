@@ -10,7 +10,6 @@ import {
   LuSlidersHorizontal as Sliders,
   LuInfo as Info,
   LuUser as User,
-  LuCrown as Crown,
   LuGlobe as Globe,
 } from "react-icons/lu";
 import { PlayerSettings } from "../components/settings/PlayerSettings";

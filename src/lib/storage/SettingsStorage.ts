@@ -104,6 +104,14 @@ export class SettingsStorage {
     mainStorage.setBool(SettingsKeys.TV_MODE_ENABLED, enabled);
   }
 
+  getString(key: string): string | undefined {
+    return mainStorage.getString(key);
+  }
+
+  setString(key: string, value: string): void {
+    mainStorage.setString(key, value);
+  }
+
   isInfoPageDynamicThemeEnabled(): boolean {
     return mainStorage.getBool(SettingsKeys.INFO_PAGE_DYNAMIC_THEME, true);
   }

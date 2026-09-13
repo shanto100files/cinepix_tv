@@ -17,7 +17,7 @@ interface Package {
 export function PremiumPage() {
   const [packages, setPackages] = useState<Package[]>([]);
   const [paymentNumbers, setPaymentNumbers] = useState({ bkash: '', nagad: '', rocket: '' });
-  const [adminContact, setAdminContact] = useState({ phone: '', telegram: '' });
+  const [, setAdminContact] = useState({ phone: '', telegram: '' });
   const [selectedPkg, setSelectedPkg] = useState<Package | null>(null);
   const [paymentMethod, setPaymentMethod] = useState('bkash');
   const [transactionId, setTransactionId] = useState('');
