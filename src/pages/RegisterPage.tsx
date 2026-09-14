@@ -36,7 +36,7 @@ export function RegisterPage() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <div className="auth-logo">C</div>
+        <div className="auth-logo"><img src="/cinepix-app-icon.png" alt="Cinepix" /></div>
         <h1 className="auth-title">Create Account</h1>
         <p className="auth-subtitle">Join Cinepix today</p>
 
