@@ -3,9 +3,11 @@ import { getVersion } from '@tauri-apps/api/app';
 import { ask, message } from '@tauri-apps/plugin-dialog';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { settingsStorage } from '../storage';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 
-// Helper to compare semver versions simply for Android
+const API_BASE = 'https://cinepix.top/api/app';
+const DOWNLOAD_PAGE = 'https://cinepix.top/app';
+
 const isNewer = (latest: string, current: string) => {
   if (!latest || !current) return false;
   const l = latest.replace(/[^0-9.]/g, '').split('.').map(Number);
@@ -19,100 +21,59 @@ const isNewer = (latest: string, current: string) => {
   return false;
 };
 
+async function openDownload(url: string) {
+  try {
+    await openUrl(url);
+  } catch {
+    window.open(url, '_blank');
+  }
+}
+
 export const checkAppUpdates = async (manual = false) => {
   try {
-    const userAgent = navigator.userAgent.toLowerCase();
-
-    // 0. Disable updater for Microsoft Store builds
     if (import.meta.env.VITE_IS_MS_STORE === 'true') {
       if (manual) {
         message('Updates are managed automatically by the Microsoft Store.', { title: 'Microsoft Store', kind: 'info' });
       }
       return;
     }
-    // 1. Custom fallback for Android
-    if (userAgent.includes('android')) {
-      const { data: release } = await axios.get(
-        'https://api.github.com/repos/shanto100files/cinepix_tv/releases/latest'
+
+    const isAndroid = navigator.userAgent.toLowerCase().includes('android');
+
+    let currentVersion = '';
+    try {
+      currentVersion = await getVersion();
+    } catch {
+      currentVersion = localStorage.getItem('app_version') || '';
+    }
+
+    const { data } = await axios.get(`${API_BASE}/versioncheck`, { timeout: 15000 });
+    const latest: string = data.desktop_latest_version || '';
+    const changelog: string = data.desktop_changelog || '';
+    const link: string = isAndroid
+      ? data.desktop_download_tv || DOWNLOAD_PAGE
+      : data.desktop_download_win || data.desktop_download_linux || DOWNLOAD_PAGE;
+
+    if (latest && isNewer(latest, currentVersion)) {
+      const wantToUpdate = await ask(
+        `Version ${latest} is available!${changelog ? `\n\nWhat's new:\n${changelog}` : ''}\n\nWould you like to download it now?`,
+        { title: 'Cinepix Update', kind: 'info' }
       );
-      const latestVersion = release?.tag_name;
-      const currentVersion = await getVersion();
-      
-      if (latestVersion && isNewer(latestVersion, currentVersion)) {
-        const wantToUpdate = await ask(
-          `Version ${latestVersion} is available! Would you like to go to the download page to get the new APK?`,
-          { title: 'Vega App Update', kind: 'info' }
-        );
-        if (wantToUpdate) {
-          openUrl(release.html_url);
-        }
-      } else if (manual) {
-        message('You are already on the latest version of Vega App.', { title: 'Up to Date', kind: 'info' });
+      if (wantToUpdate) {
+        await openDownload(link);
       }
-      return;
+    } else if (manual) {
+      message(
+        currentVersion
+          ? `You are already on the latest version (${currentVersion}).`
+          : 'You are already on the latest version.',
+        { title: 'Up to Date', kind: 'info' }
+      );
     }
-
-    // 2. Official Tauri Auto-Updater for Desktop
-    const { check } = await import('@tauri-apps/plugin-updater');
-    
-    // Checks the endpoints defined in tauri.conf.json
-    const update = await check();
-
-    if (!update) {
-      if (manual) {
-        message('You are already on the latest version of Vega Desktop.', { title: 'Up to Date', kind: 'info' });
-      }
-      return;
-    }
-
-    const wantToUpdate = await ask(
-      `Version ${update.version} is available!\n\nRelease notes:\n${update.body || 'New version available.'}\n\nWould you like to install it now?`,
-      { title: 'Vega Desktop Update', kind: 'info' }
-    );
-    if (!wantToUpdate) return;
-
-    message(
-      `Downloading new version (${update.version}) in the background. The app will restart when ready.`,
-      { title: 'Updating Vega Desktop', kind: 'info' }
-    );
-
-    console.log(`Downloading update ${update.version}...`);
-
-    let downloaded = 0;
-    let contentLength = 0;
-
-    // This seamlessly downloads the patch and overwrites the files silently
-    await update.downloadAndInstall((event) => {
-      switch (event.event) {
-        case 'Started':
-          contentLength = event.data.contentLength || 0;
-          break;
-        case 'Progress':
-          downloaded += event.data.chunkLength;
-          if (downloaded % (1024 * 1024 * 5) === 0) {
-            console.log(`Downloaded ${downloaded} of ${contentLength} bytes`);
-          }
-          break;
-        case 'Finished':
-          console.log('Download finished! Restarting...');
-          break;
-      }
-    });
-
-    // NOTE: On Windows, downloadAndInstall will automatically close the app and launch the installer in silent mode.
-    // So the app will restart itself automatically here!
-
   } catch (err: any) {
     console.error('Failed to check for app updates:', err);
     if (manual) {
-      const isRateLimit =
-        err instanceof AxiosError &&
-        err.response &&
-        (err.response.status === 403 || err.response.status === 429);
-      const errorMsg = isRateLimit
-        ? 'GitHub API rate limit exceeded. Please wait a few minutes before trying again.'
-        : 'Failed to check for updates. Please check your internet connection.';
-      message(errorMsg, { title: isRateLimit ? 'Rate Limited' : 'Error', kind: 'error' });
+      message('Failed to check for updates. Please check your internet connection.', { title: 'Error', kind: 'error' });
     }
   }
 };

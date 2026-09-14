@@ -15,7 +15,7 @@ import {
 import { PlayerSettings } from "../components/settings/PlayerSettings";
 import { SubtitleSettings } from "../components/settings/SubtitleSettings";
 import { PreferencesSettings } from "../components/settings/PreferencesSettings";
-import { GitHubStarButton } from "../components/settings/GitHubStarButton";
+
 import { checkAppUpdates } from "../lib/hooks/useAppUpdater";
 import { FocusableButton } from "../components/layout/FocusableButton";
 import { Switch } from "../components/ui/switch";
@@ -298,9 +298,6 @@ export const SettingsPage: React.FC = () => {
               </div>
             </div>
             <div className="settings-divider" />
-            <div className="github-star-row">
-              <GitHubStarButton />
-            </div>
           </div>
         </section>
       </div>
