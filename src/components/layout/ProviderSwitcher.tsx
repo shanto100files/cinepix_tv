@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { LuBlocks as Blocks, LuChevronDown as ChevronDown, LuCheck as Check } from 'react-icons/lu';
 import useContentStore from '../../lib/zustand/contentStore';
+import useAuthStore from '../../lib/zustand/authStore';
 import { FocusableButton } from './FocusableButton';
 import './ProviderSwitcher.css';
 
 export const ProviderSwitcher: React.FC = () => {
   const { installedProviders, provider: activeProvider, setProvider } = useContentStore();
+  const isAdmin = useAuthStore((s) => s.user?.is_admin);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -19,7 +21,7 @@ export const ProviderSwitcher: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  if (!installedProviders || installedProviders.length === 0) {
+  if (!isAdmin || !installedProviders || installedProviders.length === 0) {
     return null;
   }
 

@@ -92,6 +92,7 @@ class UpdateProvidersService {
       const updateInfos: UpdateInfo[] = [];
 
       for (const installed of installedProviders) {
+        if (installed.disabled) continue;
         const available = sources
           .get(installed.source?.author || "unknown")
           ?.find((p) => p.value === installed.value);

@@ -534,18 +534,19 @@ export class ExtensionManager {
         return;
       }
 
-      const availableValues = new Set(available.map(p => p.value));
+      const enabledAvailable = available.filter(p => !p.disabled);
+      const enabledValues = new Set(enabledAvailable.map(p => p.value));
       const installedValues = new Set(installed.map(p => p.value));
 
-      const toRemove = installed.filter(p => !availableValues.has(p.value));
+      const toRemove = installed.filter(p => !enabledValues.has(p.value) || p.disabled);
       for (const prov of toRemove) {
         try {
           this.uninstallProvider(prov.value);
-          console.log(`Auto-removed disabled provider: ${prov.display_name}`);
+          console.log(`Auto-removed disabled/missing provider: ${prov.display_name}`);
         } catch {}
       }
 
-      const notInstalled = available.filter(p => !installedValues.has(p.value));
+      const notInstalled = enabledAvailable.filter(p => !installedValues.has(p.value));
 
       if (notInstalled.length > 0) {
         console.log(`Background auto-installing ${notInstalled.length} providers...`);

@@ -191,14 +191,32 @@ export const HomePage: React.FC = () => {
     );
   }
 
-  // Loading skeleton
-  if (isHomeLoading && homeData.length === 0) {
+  if (!homeData || homeData.length === 0) {
+    if (isHomeLoading) {
+      return (
+        <div className="home-page">
+          <Hero post={null} />
+          <ContentSlider title="Loading..." posts={[]} isLoading={true} />
+          <ContentSlider title="Loading..." posts={[]} isLoading={true} />
+          <ContentSlider title="Loading..." posts={[]} isLoading={true} />
+        </div>
+      );
+    }
+
     return (
-      <div className="home-page">
-        <Hero post={null} />
-        <ContentSlider title="Loading..." posts={[]} isLoading={true} />
-        <ContentSlider title="Loading..." posts={[]} isLoading={true} />
-        <ContentSlider title="Loading..." posts={[]} isLoading={true} />
+      <div className="empty-state">
+        <h2 className="headline-md">No Content Available</h2>
+        <p className="body-lg text-muted mb-md">
+          Failed to load content from {provider?.display_name || "this provider"}.
+        </p>
+        <FocusableButton
+          className="btn-primary"
+          onClick={() => refetch()}
+          disabled={isRefetching}
+        >
+          <RefreshCw className={isRefetching ? "spin" : ""} />
+          Retry
+        </FocusableButton>
       </div>
     );
   }

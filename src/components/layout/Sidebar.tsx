@@ -74,6 +74,7 @@ export const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const tvMode = settingsStorage.isTvModeEnabled();
   const user = useAuthStore((s) => s.user);
+  const isAdmin = useAuthStore((s) => s.user?.is_admin);
   const [collapsed, setCollapsed] = React.useState(() =>
     localStorage.getItem("vegaSidebarCollapsed") === "true",
   );
@@ -140,7 +141,9 @@ export const Sidebar: React.FC = () => {
           </div>
 
           <div className="nav-group nav-group-utility">
-            {utilityDestinations.map((destination) => (
+            {utilityDestinations
+              .filter((d) => isAdmin || d.to !== "/extensions")
+              .map((destination) => (
               <NavigationDestination
                 key={destination.to}
                 {...destination}
