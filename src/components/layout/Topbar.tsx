@@ -240,8 +240,8 @@ export const Topbar: React.FC = () => {
               type="text"
               tabIndex={-1}
               readOnly={tvMode ? !isTyping : false}
-              placeholder="Search this provider"
-              aria-label="Search this provider"
+              placeholder="Search all providers"
+              aria-label="Search all providers"
               className="search-input"
               value={query}
               onFocus={() => {

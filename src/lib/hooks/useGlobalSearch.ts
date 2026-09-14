@@ -58,6 +58,22 @@ export const useGlobalSearch = (query: string) => {
     [loading]
   );
 
+  const mergedPosts = useMemo(() => {
+    const seen = new Set<string>();
+    const merged: Post[] = [];
+    for (const section of searchData) {
+      for (const post of section.Posts) {
+        const key = (post.title || '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, '');
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        merged.push(post);
+      }
+    }
+    return merged;
+  }, [searchData]);
+
   useEffect(() => {
     if (!query) {
       setSearchData([]);
@@ -95,7 +111,7 @@ export const useGlobalSearch = (query: string) => {
 
           const newData = {
             title: item.display_name,
-            Posts: data || [],
+            Posts: (data || []).map(p => ({ ...p, provider: item.value })),
             filter: query,
             providerValue: item.value,
             value: item.value,
@@ -131,5 +147,5 @@ export const useGlobalSearch = (query: string) => {
     };
   }, [query, installedProviders, trueLoading, updateSearchData, updateEmptyResults, updateLoading]);
 
-  return { searchData, emptyResults, loading, isAllLoaded };
+  return { searchData, emptyResults, loading, isAllLoaded, mergedPosts };
 };

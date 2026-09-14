@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { LuSearch as Search, LuX as X, LuTv as Tv, LuFilm as Film } from "react-icons/lu";
 import { useGlobalSearch } from "../lib/hooks/useGlobalSearch";
-import { ContentSlider } from "../components/home/ContentSlider";
+import { PostCardItem } from "../components/home/PostCardItem";
 import { FocusableButton } from "../components/layout/FocusableButton";
 import { Spinner } from "../components/ui/spinner";
 import { FocusContext, useFocusable } from "@noriginmedia/norigin-spatial-navigation-react";
@@ -89,7 +89,7 @@ export const SearchPage: React.FC = () => {
       trackChildren: true,
     });
 
-  const { searchData, emptyResults, loading, isAllLoaded } =
+  const { mergedPosts, emptyResults, loading, isAllLoaded } =
     useGlobalSearch(query);
 
   useEffect(() => {
@@ -162,7 +162,7 @@ export const SearchPage: React.FC = () => {
     }
   };
 
-  const hasAnyResults = searchData.length > 0;
+  const hasAnyResults = mergedPosts.length > 0;
   const isCurrentlyLoading = loading.some((l) => l.isLoading);
   const showSuggestions =
     (isInputFocused || isTyping) &&
@@ -306,28 +306,19 @@ export const SearchPage: React.FC = () => {
         )}
 
       {query && (
-        <div className="search-sliders-container">
-          {searchData.map((data) => (
-            <ContentSlider
-              key={`data-${data.providerValue}`}
-              title={data.title}
-              posts={data.Posts}
-              providerValue={data.providerValue}
-              isLoading={
-                loading.find((l) => l.value === data.providerValue)?.isLoading
-              }
-            />
-          ))}
-
-          {emptyResults.map((data) => (
-            <ContentSlider
-              key={`empty-${data.providerValue}`}
-              title={data.title}
-              posts={data.Posts}
-              providerValue={data.providerValue}
-              isLoading={
-                loading.find((l) => l.value === data.providerValue)?.isLoading
-              }
+        <div className="search-grid pb-xl">
+          {mergedPosts.map((post, index) => (
+            <PostCardItem
+              key={`${post.link}-${index}`}
+              post={post}
+              onClick={() => {
+                const params = new URLSearchParams();
+                if (post.provider) params.append("provider", post.provider);
+                if (post.image) params.append("poster", post.image);
+                navigate(
+                  `/content/${encodeURIComponent(post.link)}?${params.toString()}`,
+                );
+              }}
             />
           ))}
         </div>

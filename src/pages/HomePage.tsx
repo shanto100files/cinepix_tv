@@ -4,7 +4,7 @@ import {
   useHomePageData,
   getRandomHeroPost,
 } from "../lib/hooks/useHomePageData";
-import { useSearch } from "../lib/hooks/useSearch";
+import { useGlobalSearch } from "../lib/hooks/useGlobalSearch";
 import useContentStore from "../lib/zustand/contentStore";
 import { Hero } from "../components/home/Hero";
 import { ContentSlider } from "../components/home/ContentSlider";
@@ -39,10 +39,11 @@ export const HomePage: React.FC = () => {
   });
 
   const {
-    data: searchResults,
-    isLoading: isSearchLoading,
-    error: searchError,
-  } = useSearch(query, effectiveProvider?.value, !!query);
+    mergedPosts: searchResults,
+    loading: searchLoading,
+    isAllLoaded: searchDone,
+  } = useGlobalSearch(query);
+  const isSearchLoading = searchLoading.some((l) => l.isLoading);
 
   const history = useWatchHistoryStore((state) => state.history);
 
@@ -114,46 +115,32 @@ export const HomePage: React.FC = () => {
     );
   }
 
-  // Handle Search View
+  // Handle Search View — all providers merged grid, no provider names
   if (query) {
     return (
       <div className="home-page search-active">
         <div className="search-results-meta mb-md">
           <p className="body-lg text-muted">
-            Showing results for "{query}" on {provider?.display_name}
+            {searchDone ? "Results for" : "Searching for"} &quot;{query}&quot;
           </p>
         </div>
 
-        {isSearchLoading && (
+        {isSearchLoading && searchResults.length === 0 && (
           <div className="search-loading flex justify-center py-xl">
-            <Spinner size={48} label="Searching provider" />
+            <Spinner size={48} label="Searching all providers" />
           </div>
         )}
 
-        {searchError && (
-          <div className="error-state">
-            <h2 className="headline-md">Failed to search</h2>
-            <p className="body-md text-muted">
-              {searchError instanceof Error
-                ? searchError.message
-                : "An error occurred"}
-            </p>
-          </div>
-        )}
-
-        {!isSearchLoading && !searchError && searchResults?.length === 0 && (
+        {searchDone && searchResults.length === 0 && (
           <div className="empty-state">
             <h2 className="headline-md">No results found</h2>
             <p className="body-lg text-muted">
-              Try adjusting your search terms or switching providers.
+              Try adjusting your search terms.
             </p>
           </div>
         )}
 
-        {!isSearchLoading &&
-          !searchError &&
-          searchResults &&
-          searchResults.length > 0 && (
+        {searchResults.length > 0 && (
             <div className="search-grid pb-xl">
               {searchResults.map((post, index) => (
                 <PostCardItem
@@ -161,8 +148,8 @@ export const HomePage: React.FC = () => {
                   post={post}
                   onClick={() => {
                     const params = new URLSearchParams();
-                    if (provider?.value)
-                      params.append("provider", provider.value);
+                    const pv = post.provider || effectiveProvider?.value;
+                    if (pv) params.append("provider", pv);
                     if (post.image) params.append("poster", post.image);
                     navigate(
                       `/content/${encodeURIComponent(post.link)}?${params.toString()}`,
