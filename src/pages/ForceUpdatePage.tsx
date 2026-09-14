@@ -8,8 +8,18 @@ export function ForceUpdatePage({ killSwitchBlocked, reason }: { killSwitchBlock
   const handleDownload = async () => {
     setDownloading(true);
     try {
-      window.open(`${API_BASE}/versioncheck`, '_blank');
-    } catch {}
+      const res = await fetch(`${API_BASE}/versioncheck`);
+      const data = await res.json();
+      const ua = navigator.userAgent.toLowerCase();
+      const url = ua.includes('android')
+        ? data.desktop_download_tv
+        : ua.includes('linux')
+          ? data.desktop_download_linux
+          : data.desktop_download_win;
+      window.open(url || 'https://cinepix.top/app', '_blank');
+    } catch {
+      window.open('https://cinepix.top/app', '_blank');
+    }
     setTimeout(() => setDownloading(false), 3000);
   };
 

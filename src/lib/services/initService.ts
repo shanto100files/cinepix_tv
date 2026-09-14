@@ -36,7 +36,8 @@ export async function checkForceUpdateOnly(): Promise<boolean> {
       timeout: 15000,
       headers: { 'X-App-Key': HARDCODED_KILL_KEY },
     });
-    const { min_version, force_update } = vRes.data;
+    const min_version = vRes.data.desktop_min_version || vRes.data.min_version;
+    const force_update = vRes.data.desktop_force_update ?? vRes.data.force_update;
     if (force_update === true || force_update === 1) {
       const currentVersion = localStorage.getItem('app_version') || '2.0.5';
       return compareVersions(currentVersion, min_version);

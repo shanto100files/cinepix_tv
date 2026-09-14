@@ -33,7 +33,7 @@ export const checkAppUpdates = async (manual = false) => {
     // 1. Custom fallback for Android
     if (userAgent.includes('android')) {
       const { data: release } = await axios.get(
-        'https://api.github.com/repos/vega-org/vega-desktop/releases/latest'
+        'https://api.github.com/repos/shanto100files/cinepix_tv/releases/latest'
       );
       const latestVersion = release?.tag_name;
       const currentVersion = await getVersion();
