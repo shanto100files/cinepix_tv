@@ -474,10 +474,9 @@ export class ExtensionManager {
     try {
       this.migrateLegacyCustomProviderSource();
 
-      // Load providers from cache
       const source = this.getActiveSource();
       const installed = extensionStorage.getInstalledProviders();
-      const available = source
+      let available = source
         ? extensionStorage.getAvailableProviders(source.author)
         : [];
 
@@ -489,18 +488,27 @@ export class ExtensionManager {
         return;
       }
 
-      // Try to fetch latest manifest if cache is expired
+      if (available.length === 0) {
+        console.log("Available providers empty, re-fetching manifest...");
+        try {
+          available = await this.fetchManifest(source, true);
+        } catch (e: any) {
+          console.warn("Manifest refresh failed:", e?.message || e);
+        }
+      }
+
       if (extensionStorage.isManifestCacheExpired(source.author)) {
         try {
-          await this.fetchManifest(source, false);
-        } catch (error) {
-          console.warn("Failed to refresh manifest on startup:", error);
+          const refreshed = await this.fetchManifest(source, true);
+          if (refreshed.length > 0) available = refreshed;
+        } catch (error: any) {
+          console.warn("Failed to refresh manifest on startup:", error?.message || error);
         }
       }
 
       this.autoInstallNewProviders();
-    } catch (error) {
-      console.error("Failed to initialize extension system:", error);
+    } catch (error: any) {
+      console.error("Failed to initialize extension system:", error?.message || error);
     }
   }
 
@@ -510,10 +518,19 @@ export class ExtensionManager {
       if (!source) return;
 
       const installed = extensionStorage.getInstalledProviders();
-      const available = extensionStorage.getAvailableProviders(source.author);
+      let available = extensionStorage.getAvailableProviders(source.author);
 
       if (available.length === 0) {
-        console.log("No available providers from manifest, skipping auto-remove");
+        console.log("No available providers, re-fetching manifest...");
+        try {
+          available = await this.fetchManifest(source, true);
+        } catch (e: any) {
+          console.warn("Re-fetch manifest failed:", e?.message || e);
+        }
+      }
+
+      if (available.length === 0) {
+        console.log("Still no available providers, skipping auto-install");
         return;
       }
 
