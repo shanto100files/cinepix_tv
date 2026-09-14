@@ -101,12 +101,12 @@ export const useHomePageData = ({
       });
 
       if (allData.length > 0) {
-        syncToServer(provider.value, allData).catch(() => {});
+        syncToServer(providersToFetch[0]?.value || provider.value, allData).catch(() => {});
       }
 
       return allData;
     },
-    enabled: enabled && !!provider?.value,
+    enabled: enabled && providersToFetch.length > 0 && providersToFetch.some(p => p.value),
     staleTime: 60 * 1000,
     gcTime: 60 * 60 * 1000,
     retry: (failureCount, error) => {

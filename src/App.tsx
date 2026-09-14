@@ -57,11 +57,15 @@ export default function App() {
   const [forceUpdateNeeded, setForceUpdateNeeded] = useState(false);
 
   const loadToken = useAuthStore(s => s.loadToken);
+  const refreshProfile = useAuthStore(s => s.refreshProfile);
   const fetchAds = useAdStore(s => s.fetchAds);
 
   useEffect(() => {
     loadToken();
-  }, [loadToken]);
+    if (useAuthStore.getState().token) {
+      refreshProfile();
+    }
+  }, [loadToken, refreshProfile]);
 
   useEffect(() => {
     const t = setTimeout(() => {

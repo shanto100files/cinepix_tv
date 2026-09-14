@@ -8,6 +8,7 @@ import {
 } from "../storage/extensionStorage";
 import { mainStorage } from "../storage/StorageService";
 import { createProviderSource } from "../utils/helpers";
+import useContentStore from "../zustand/contentStore";
 
 export const isRateLimitError = (error: unknown): boolean => {
   if (!error) return false;
@@ -512,6 +513,22 @@ export class ExtensionManager {
     }
   }
 
+  private syncStores(): void {
+    try {
+      const installed = extensionStorage
+        .getInstalledProviders()
+        .sort((a, b) => a.display_name.localeCompare(b.display_name));
+      const state = useContentStore.getState();
+      state.setInstalledProviders(installed);
+      if (!state.provider?.value && installed.length > 0) {
+        state.setProvider(installed[0]);
+      } else if (state.provider?.value) {
+        const fresh = installed.find((p) => p.value === state.provider.value);
+        if (fresh) state.setProvider(fresh);
+      }
+    } catch {}
+  }
+
   private async autoInstallNewProviders(): Promise<void> {
     try {
       const source = this.getActiveSource();
@@ -531,6 +548,7 @@ export class ExtensionManager {
 
       if (available.length === 0) {
         console.log("Still no available providers, skipping auto-install");
+        this.syncStores();
         return;
       }
 
@@ -559,6 +577,8 @@ export class ExtensionManager {
           }
         }));
       }
+
+      this.syncStores();
     } catch (error) {
       console.warn("Auto-install failed:", error);
     }

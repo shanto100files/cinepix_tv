@@ -24,6 +24,8 @@ export const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
   const { provider, installedProviders } = useContentStore();
+  const effectiveProvider =
+    provider?.value ? provider : installedProviders?.[0] || provider;
 
   const {
     data: homeData = [],
@@ -33,14 +35,14 @@ export const HomePage: React.FC = () => {
     isRefetching,
   } = useHomePageData({
     provider,
-    enabled: !!(installedProviders?.length && provider?.value && !query),
+    enabled: !!(installedProviders?.length && !query),
   });
 
   const {
     data: searchResults,
     isLoading: isSearchLoading,
     error: searchError,
-  } = useSearch(query, provider?.value, !!query);
+  } = useSearch(query, effectiveProvider?.value, !!query);
 
   const history = useWatchHistoryStore((state) => state.history);
 
