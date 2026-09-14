@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { LuEye as Eye, LuEyeOff as EyeOff } from 'react-icons/lu';
 import useAuthStore from '../lib/zustand/authStore';
 import { sendHeartbeat } from '../lib/services/heartbeatService';
 import { trackEvent } from '../lib/services/analyticsService';
+import './AuthPages.css';
 
 export function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const login = useAuthStore(s => s.login);
@@ -32,57 +35,61 @@ export function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[var(--background)]">
-      <div className="w-full max-w-md p-8 rounded-2xl bg-[var(--surface-container)] border border-[var(--outline-variant)]">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-[var(--on-surface)]">Welcome Back</h1>
-          <p className="text-sm text-[var(--on-surface-variant)] mt-2">Sign in to your Cinepix account</p>
-        </div>
+    <div className="auth-page">
+      <div className="auth-card">
+        <div className="auth-logo">C</div>
+        <h1 className="auth-title">Welcome Back</h1>
+        <p className="auth-subtitle">Sign in to your Cinepix account</p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-[var(--on-surface-variant)] mb-1.5">Username or Email</label>
+        <form onSubmit={handleSubmit}>
+          <div className="auth-field">
+            <label className="auth-label" htmlFor="login-username">Username or Email</label>
             <input
+              id="login-username"
               type="text"
               value={username}
               onChange={e => setUsername(e.target.value)}
               placeholder="Enter username or email"
-              className="w-full px-4 py-3 rounded-xl bg-[var(--surface-container-high)] border border-[var(--outline-variant)] text-[var(--on-surface)] placeholder:text-[var(--on-surface-variant)] focus:outline-none focus:border-[var(--primary)] transition-colors"
+              className="auth-input"
               autoFocus
+              autoComplete="username"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-[var(--on-surface-variant)] mb-1.5">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="Enter password"
-              className="w-full px-4 py-3 rounded-xl bg-[var(--surface-container-high)] border border-[var(--outline-variant)] text-[var(--on-surface)] placeholder:text-[var(--on-surface-variant)] focus:outline-none focus:border-[var(--primary)] transition-colors"
-            />
+          <div className="auth-field">
+            <label className="auth-label" htmlFor="login-password">Password</label>
+            <div className="auth-input-wrap">
+              <input
+                id="login-password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="Enter password"
+                className="auth-input has-toggle"
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                className="auth-toggle"
+                onClick={() => setShowPassword(v => !v)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
-          {error && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">{error}</div>
-          )}
+          {error && <div className="auth-error">{error}</div>}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 rounded-xl bg-[var(--primary)] text-[var(--on-primary)] font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
-          >
+          <button type="submit" disabled={loading} className="auth-submit">
+            {loading && <span className="auth-spinner" />}
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
-        <div className="text-center mt-6">
-          <span className="text-sm text-[var(--on-surface-variant)]">Don't have an account? </span>
-          <Link to="/register" className="text-sm text-[var(--primary)] font-medium hover:underline">Sign Up</Link>
+        <div className="auth-switch">
+          Don&apos;t have an account? <Link to="/register">Sign Up</Link>
         </div>
-
-        <div className="text-center mt-4">
-          <button onClick={() => navigate('/')} className="text-xs text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]">Skip for now</button>
-        </div>
+        <button onClick={() => navigate('/')} className="auth-skip">Skip for now</button>
       </div>
     </div>
   );
