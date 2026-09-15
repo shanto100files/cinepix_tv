@@ -11,6 +11,7 @@ import {
 } from "tauri-plugin-libmpv-api";
 import { invoke } from "@tauri-apps/api/core";
 import { settingsStorage } from "../storage/SettingsStorage";
+import { fetchAndSanitizeSubtitle } from "../utils/subtitleSanitizer";
 
 const OBSERVED_PROPERTIES = [
   ["pause", "flag"],
@@ -339,8 +340,9 @@ export const useMpvPlayer = (opts?: UseMpvPlayerOptions) => {
                 if (subUrl) {
                   subUrl = subUrl.replace(/\\/g, "/");
                   try {
+                    const cleanUrl = await fetchAndSanitizeSubtitle(subUrl);
                     await command("sub-add", [
-                      subUrl,
+                      cleanUrl,
                       "auto",
                       sub.title || sub.language || "External",
                     ]);
@@ -803,7 +805,8 @@ export const useMpvPlayer = (opts?: UseMpvPlayerOptions) => {
     async (url: string, title?: string) => {
       if (!isInitialized) return;
       try {
-        await command("sub-add", [url, "auto", title || "External"]);
+        const cleanUrl = await fetchAndSanitizeSubtitle(url);
+        await command("sub-add", [cleanUrl, "auto", title || "External"]);
         setTimeout(fetchTracks, 1000);
       } catch (err) {
         console.error("Failed to add subtitle:", err);
