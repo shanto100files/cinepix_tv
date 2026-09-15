@@ -1,5 +1,5 @@
 {
-  "identifier": "Zenda-X.VegaApp",
+  "identifier": "Cinepix.DesktopApp",
   "bundle": {
     "targets": ["nsis"],
     "resources": ["lib/*.dll", "resources/windows/vc_redist.x64.exe"],

@@ -2,6 +2,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    vega_app_lib::run()
+    cinepix_app_lib::run()
 }
 // Force rebuild
