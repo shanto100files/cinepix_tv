@@ -39,7 +39,7 @@ export async function checkForceUpdateOnly(): Promise<boolean> {
     const min_version = vRes.data.desktop_min_version || vRes.data.min_version;
     const force_update = vRes.data.desktop_force_update ?? vRes.data.force_update;
     if (force_update === true || force_update === 1) {
-      const currentVersion = localStorage.getItem('app_version') || '2.0.5';
+      const currentVersion = localStorage.getItem('app_version') || '5.5.9';
       return compareVersions(currentVersion, min_version);
     }
     return false;
@@ -50,7 +50,7 @@ export async function checkForceUpdateOnly(): Promise<boolean> {
 
 async function checkKillSwitch(): Promise<{ blocked: boolean; shutdown?: boolean; reason?: string }> {
   try {
-    const version = localStorage.getItem('app_version') || '2.0.6';
+    const version = localStorage.getItem('app_version') || '5.5.9';
     const deviceId = getDeviceId();
     const res = await fetch(`${API_BASE}/check`, {
       method: 'POST',

@@ -27,7 +27,7 @@ export async function sendHeartbeat() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-App-Version': '2.0.5',
+        'X-App-Version': '5.5.9',
         'X-App-Key': HARDCODED_KEY,
         'X-Device-Info': `desktop/${navigator.platform}`,
         'X-Device-Id': deviceId,

@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Cinepix",
-  "version": "2.0.5",
-  "identifier": "com.vega.desktop",
+  "version": "5.5.9",
+  "identifier": "com.cinepix.desktop",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",

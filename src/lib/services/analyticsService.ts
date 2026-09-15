@@ -41,7 +41,7 @@ export function trackEvent(eventType: string, data: Record<string, any> = {}) {
     device_model: navigator.platform,
     device_brand: 'Desktop',
     os_version: navigator.userAgent,
-    app_version: '2.0.5',
+    app_version: '5.5.9',
     session_id: getSessionId(),
     duration_seconds: data.duration_seconds ?? 0,
     timestamp: Date.now(),
@@ -82,7 +82,7 @@ export async function flushBatch() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-App-Version': '2.0.5',
+        'X-App-Version': '5.5.9',
         'X-App-Key': HARDCODED_KEY,
       },
       body: JSON.stringify({
@@ -92,7 +92,7 @@ export async function flushBatch() {
         device_model: navigator.platform,
         device_brand: 'Desktop',
         os_version: navigator.userAgent,
-        app_version: '2.0.5',
+        app_version: '5.5.9',
       }),
     });
   } catch {
