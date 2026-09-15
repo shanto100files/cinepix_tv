@@ -14,17 +14,19 @@ interface HeroProps {
     title: string;
     image: string;
     link: string;
+    provider?: string;
   } | null;
 }
 
 export const Hero: React.FC<HeroProps> = ({ post }) => {
   const navigate = useNavigate();
   const { provider } = useContentStore();
+  const postProvider = post?.provider || provider?.value || "";
   const tvMode = settingsStorage.isTvModeEnabled();
 
   const { data: meta, isLoading: metaLoading } = useHeroMetadata(
     post?.link || "",
-    provider?.value || "",
+    postProvider,
   );
   const heroArtwork = meta?.background || meta?.image || post?.image;
   const artworkPaletteStyle = useArtworkPalette(heroArtwork);
@@ -43,7 +45,7 @@ export const Hero: React.FC<HeroProps> = ({ post }) => {
   const handlePlayClick = () => {
     if (post) {
       const params = new URLSearchParams();
-      if (provider?.value) params.set("provider", provider.value);
+      if (postProvider) params.set("provider", postProvider);
       if (post.image) params.set("poster", post.image);
       navigate(`/content/${encodeURIComponent(post.link)}?${params.toString()}`);
     }

@@ -54,7 +54,7 @@ export const ContentSlider: React.FC<ContentSliderProps> = ({
   };
 
   const handlePostClick = (post: Post) => {
-    const finalProvider = post.providerValue || providerValue;
+    const finalProvider = post.providerValue || (post as any).provider || providerValue;
 
     let url = `/content/${encodeURIComponent(post.link)}`;
     const params = new URLSearchParams();
