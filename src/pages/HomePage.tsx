@@ -239,7 +239,7 @@ export const HomePage: React.FC = () => {
             providerValue={provider?.value}
           />
         ))}
-        <AdBox url={useAdStore.getState().ads.bottom} />
+        <AdBox url={useAdStore(s => s.ads.enabled ? s.ads.bottom : "")} />
       </div>
     </div>
   );

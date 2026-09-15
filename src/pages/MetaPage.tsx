@@ -526,7 +526,7 @@ export const MetaPage: React.FC = () => {
         />
 
         <div className="content-detail-inner">
-          <AdBox url={useAdStore.getState().ads.top} height={80} />
+          <AdBox url={useAdStore(s => s.ads.enabled ? s.ads.top : "")} height={80} />
           <ContentOverview
             description={description}
             providerName={providerName}
