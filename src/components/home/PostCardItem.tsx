@@ -142,7 +142,7 @@ export const PostCardItem: React.FC<PostCardItemProps> = ({
   const isLandscape = activeAspectRatio > 1.2;
   const isSquare = activeAspectRatio > 0.85 && activeAspectRatio <= 1.2;
   const activeTag = post.cornerTag || post.tag;
-  const has4K = /\b4k\b/i.test(post.title) || /\b4k\b/i.test(activeTag || "");
+  const has4K = /\b4k\b/i.test(post.title) || /\b4k\b/i.test(activeTag || "") || (post as any).provider === "4khdhub";
 
   return (
     <div
