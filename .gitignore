@@ -45,3 +45,5 @@ vega.key
 vega.key.pub  
 src-tauri/resources/windows/vc_redist.x64.exe
  
+# Android gen folder (regenerated from tauri.conf.json)
+src-tauri/gen/

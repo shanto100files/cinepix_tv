@@ -211,6 +211,11 @@ jobs:
           linker = "${BIN}/x86_64-linux-android21-clang"
           EOF
 
+      - name: Regenerate Android project
+        run: |
+          rm -rf src-tauri/gen/android
+          npx tauri android init
+
       - name: Build Android APK
         env:
           NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
