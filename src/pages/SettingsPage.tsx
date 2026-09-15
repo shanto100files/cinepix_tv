@@ -11,6 +11,11 @@ import {
   LuInfo as Info,
   LuUser as User,
   LuGlobe as Globe,
+  LuCrown as Crown,
+  LuSparkles as Sparkles,
+  LuDownload as Download,
+  LuShieldCheck as Shield,
+  LuZap as Zap,
 } from "react-icons/lu";
 import { PlayerSettings } from "../components/settings/PlayerSettings";
 import { SubtitleSettings } from "../components/settings/SubtitleSettings";
@@ -133,6 +138,102 @@ export const SettingsPage: React.FC = () => {
                   Sign In
                 </FocusableButton>
               </div>
+            )}
+          </div>
+        </section>
+
+        {/* Language Group */}
+
+        {/* Premium Group */}
+        <section className="settings-group">
+          <h2
+            className="title-md flex items-center gap-2"
+            style={{ marginBottom: "8px" }}
+          >
+            <Crown size={20} /> Premium
+          </h2>
+          <div className="settings-card">
+            {isPremium ? (
+              <>
+                <div className="settings-row">
+                  <div className="settings-info">
+                    <h3 className="label-lg" style={{ color: "#facc15" }}>
+                      <Sparkles size={16} style={{ marginRight: 6, verticalAlign: "middle" }} />
+                      You are Premium
+                    </h3>
+                    <p className="body-md text-muted">
+                      Enjoy all premium features
+                    </p>
+                  </div>
+                </div>
+                <div className="settings-divider" />
+                <div className="premium-benefits">
+                  <div className="premium-benefit-item">
+                    <Download size={18} className="premium-benefit-icon" />
+                    <div>
+                      <h4>Unlimited Downloads</h4>
+                      <p>Download any content for offline viewing without limits</p>
+                    </div>
+                  </div>
+                  <div className="premium-benefit-item">
+                    <Zap size={18} className="premium-benefit-icon" />
+                    <div>
+                      <h4>Priority Streaming</h4>
+                      <p>Faster stream resolution with priority server access</p>
+                    </div>
+                  </div>
+                  <div className="premium-benefit-item">
+                    <Shield size={18} className="premium-benefit-icon" />
+                    <div>
+                      <h4>Ad-Free Experience</h4>
+                      <p>Enjoy content without any advertisements</p>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="settings-row">
+                  <div className="settings-info">
+                    <h3 className="label-lg">Free Plan</h3>
+                    <p className="body-md text-muted">
+                      Upgrade to unlock premium features
+                    </p>
+                  </div>
+                  <FocusableButton
+                    className="theme-toggle-btn active"
+                    onClick={() => navigate("/premium")}
+                    style={{ padding: "6px 12px" }}
+                  >
+                    <Crown size={14} style={{ marginRight: 6 }} />
+                    Upgrade
+                  </FocusableButton>
+                </div>
+                <div className="settings-divider" />
+                <div className="premium-benefits premium-benefits-muted">
+                  <div className="premium-benefit-item">
+                    <Download size={18} className="premium-benefit-icon" />
+                    <div>
+                      <h4>Unlimited Downloads</h4>
+                      <p>Download any content for offline viewing without limits</p>
+                    </div>
+                  </div>
+                  <div className="premium-benefit-item">
+                    <Zap size={18} className="premium-benefit-icon" />
+                    <div>
+                      <h4>Priority Streaming</h4>
+                      <p>Faster stream resolution with priority server access</p>
+                    </div>
+                  </div>
+                  <div className="premium-benefit-item">
+                    <Shield size={18} className="premium-benefit-icon" />
+                    <div>
+                      <h4>Ad-Free Experience</h4>
+                      <p>Enjoy content without any advertisements</p>
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
           </div>
         </section>

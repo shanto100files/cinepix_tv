@@ -102,6 +102,16 @@
   .settings-page input[type="range"] { width: 100%; }
 }
 
+/* Premium Benefits */
+.premium-benefits { padding: 8px 21px 17px; }
+.premium-benefits-muted { opacity: 0.55; }
+.premium-benefits-muted h4 { opacity: 1; }
+.premium-benefit-item { display: flex; align-items: flex-start; gap: 14px; padding: 12px 0; }
+.premium-benefit-item + .premium-benefit-item { border-top: 1px solid var(--outline-variant); }
+.premium-benefit-icon { flex: 0 0 auto; margin-top: 2px; color: #facc15; }
+.premium-benefit-item h4 { margin: 0 0 2px; color: var(--on-surface); font-size: 14px; font-weight: 650; }
+.premium-benefit-item p { margin: 0; color: var(--on-surface-variant); font-size: 12px; line-height: 1.5; }
+
 @media (prefers-reduced-motion: reduce) {
   .settings-page *, .accent-color-btn { scroll-behavior: auto !important; transition: none !important; }
   .github-star-particles .particle { animation: none !important; }
