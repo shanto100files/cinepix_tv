@@ -1,55 +1,52 @@
-import { useState } from "react";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 interface AdBoxProps {
   url: string;
   height?: number;
 }
 
-export function AdBox({ url, height = 120 }: AdBoxProps) {
-  const [loading, setLoading] = useState(true);
-
+export function AdBox({ url, height = 100 }: AdBoxProps) {
   if (!url) return null;
 
   return (
     <div
+      onClick={() => openUrl(url).catch(() => {})}
       style={{
         width: "100%",
         height,
-        borderRadius: 8,
+        borderRadius: 10,
         overflow: "hidden",
-        margin: "8px 0",
-        backgroundColor: "#000",
+        margin: "12px 0",
+        background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        cursor: "pointer",
         position: "relative",
+        border: "1px solid rgba(255,255,255,0.08)",
+        flexShrink: 0,
       }}
     >
-      {loading && (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1,
-          }}
-        >
-          <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-        </div>
-      )}
-      <iframe
-        src={url}
+      <div
         style={{
-          width: "100%",
-          height,
-          border: "none",
-          backgroundColor: "#000",
+          position: "absolute",
+          inset: 0,
+          background: "radial-gradient(ellipse at 30% 50%, rgba(99,102,241,0.15) 0%, transparent 70%)",
         }}
-        onLoad={() => setLoading(false)}
-        onError={() => setLoading(false)}
-        sandbox="allow-scripts allow-same-origin"
-        scrolling="no"
-        title="Advertisement"
       />
+      <span
+        style={{
+          color: "rgba(255,255,255,0.5)",
+          fontSize: 12,
+          fontWeight: 500,
+          letterSpacing: 1.5,
+          textTransform: "uppercase" as const,
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        Sponsor
+      </span>
     </div>
   );
 }

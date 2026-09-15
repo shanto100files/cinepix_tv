@@ -142,6 +142,7 @@ export const PostCardItem: React.FC<PostCardItemProps> = ({
   const isLandscape = activeAspectRatio > 1.2;
   const isSquare = activeAspectRatio > 0.85 && activeAspectRatio <= 1.2;
   const activeTag = post.cornerTag || post.tag;
+  const has4K = /\b4k\b/i.test(post.title) || /\b4k\b/i.test(activeTag || "");
 
   return (
     <div
@@ -188,6 +189,27 @@ export const PostCardItem: React.FC<PostCardItemProps> = ({
         {activeTag && activeTag.trim().length > 0 && (
           <span className="post-corner-tag">
             {activeTag.trim().toUpperCase()}
+          </span>
+        )}
+        {has4K && (
+          <span
+            style={{
+              position: "absolute",
+              bottom: 6,
+              left: 6,
+              background: "linear-gradient(135deg, #f59e0b, #d97706)",
+              color: "#000",
+              fontSize: 10,
+              fontWeight: 800,
+              padding: "2px 6px",
+              borderRadius: 4,
+              letterSpacing: 0.5,
+              lineHeight: "14px",
+              zIndex: 2,
+              boxShadow: "0 1px 4px rgba(245,158,11,0.4)",
+            }}
+          >
+            4K
           </span>
         )}
         {post.image && !imageFailed && (
