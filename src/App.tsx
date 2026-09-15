@@ -200,6 +200,7 @@ export default function App() {
       <div className="flex flex-col items-center justify-center min-h-screen bg-[var(--background)]">
         <div className="w-64">
           <div className="text-center mb-6">
+            <img src="/cinepix-app-icon.png" alt="Cinepix" className="w-16 h-16 mx-auto mb-3 rounded-2xl shadow-lg" />
             <h1 className="text-xl font-bold text-[var(--on-surface)]">Cinepix</h1>
           </div>
           <div className="w-full h-2 bg-[var(--surface-container-high)] rounded-full overflow-hidden mb-3">
