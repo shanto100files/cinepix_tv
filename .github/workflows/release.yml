@@ -92,6 +92,7 @@ jobs:
 
       - name: Build MSIX (Windows only)
         if: matrix.platform == 'windows-latest'
+        continue-on-error: true
         run: npm run build:msix
 
       - name: Get version
