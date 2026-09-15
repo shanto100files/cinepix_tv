@@ -211,10 +211,21 @@ jobs:
           linker = "${BIN}/x86_64-linux-android21-clang"
           EOF
 
-      - name: Regenerate Android project
+      - name: Fix Android package name
         run: |
-          rm -rf src-tauri/gen/android
-          npx tauri android init
+          OLD="com.vega.desktop"
+          NEW="com.cinepix.desktop"
+          # Fix package declarations in Kotlin files
+          find src-tauri/gen/android -type f \( -name "*.kt" -o -name "*.xml" -o -name "*.kts" \) -exec sed -i "s|$OLD|$NEW|g" {} +
+          # Rename directory if it still has old name
+          if [ -d "src-tauri/gen/android/app/src/main/java/com/vega" ]; then
+            mkdir -p "src-tauri/gen/android/app/src/main/java/com/cinepix"
+            cp -r src-tauri/gen/android/app/src/main/java/com/vega/desktop/* src-tauri/gen/android/app/src/main/java/com/cinepix/desktop/ 2>/dev/null || true
+            rm -rf src-tauri/gen/android/app/src/main/java/com/vega
+          fi
+          mkdir -p "src-tauri/gen/android/app/src/main/java/com/cinepix/desktop"
+          # Also fix buildSrc
+          find src-tauri/gen/android/buildSrc -type f -name "*.kt" -exec sed -i "s|$OLD|$NEW|g" {} + 2>/dev/null || true
 
       - name: Build Android APK
         env:
