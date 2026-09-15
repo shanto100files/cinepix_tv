@@ -46,6 +46,7 @@ export const HomePage: React.FC = () => {
   const isSearchLoading = searchLoading.some((l) => l.isLoading);
 
   const history = useWatchHistoryStore((state) => state.history);
+  const bottomAdUrl = useAdStore(s => s.ads.enabled ? s.ads.bottom : "");
 
   const heroPost = useMemo(() => {
     if (!homeData || homeData.length === 0) {
@@ -239,7 +240,7 @@ export const HomePage: React.FC = () => {
             providerValue={provider?.value}
           />
         ))}
-        <AdBox url={useAdStore(s => s.ads.enabled ? s.ads.bottom : "")} />
+        <AdBox url={bottomAdUrl} />
       </div>
     </div>
   );

@@ -40,6 +40,7 @@ import useAdStore from "./lib/zustand/adStore";
 
 import { applyThemeTokens } from "./lib/theme";
 import { ToastContainer } from "./components/ui/ToastContainer";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 let isNavInitialized = false;
 
@@ -216,6 +217,7 @@ export default function App() {
   }
 
   return (
+    <ErrorBoundary>
     <QueryClientProvider client={client}>
       <WafDialog />
       <ToastContainer />
@@ -247,5 +249,6 @@ export default function App() {
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
+    </ErrorBoundary>
   );
 }

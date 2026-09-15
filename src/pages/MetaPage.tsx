@@ -156,6 +156,7 @@ export const MetaPage: React.FC = () => {
   const [episodeSearch, setEpisodeSearch] = useState("");
   const [episodeDetails, setEpisodeDetails] = useState<EpisodeDetails | null>(null);
   const [storyOpen, setStoryOpen] = useState(false);
+  const topAdUrl = useAdStore(s => s.ads.enabled ? s.ads.top : "");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">(() =>
     localStorage.getItem(episodeSortOrderKey) === "desc" ? "desc" : "asc",
   );
@@ -526,7 +527,7 @@ export const MetaPage: React.FC = () => {
         />
 
         <div className="content-detail-inner">
-          <AdBox url={useAdStore(s => s.ads.enabled ? s.ads.top : "")} height={80} />
+          <AdBox url={topAdUrl} height={80} />
           <ContentOverview
             description={description}
             providerName={providerName}

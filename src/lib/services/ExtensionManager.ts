@@ -507,7 +507,7 @@ export class ExtensionManager {
         }
       }
 
-      this.autoInstallNewProviders();
+      await this.autoInstallNewProviders();
     } catch (error: any) {
       console.error("Failed to initialize extension system:", error?.message || error);
     }

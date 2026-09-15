@@ -95,7 +95,7 @@ export async function initializeApp(onProgress: (p: InitProgress) => void): Prom
       const { extensionManager } = await import('./ExtensionManager');
       await Promise.race([
         extensionManager.initialize(),
-        new Promise((_, rej) => setTimeout(() => rej(new Error('init timeout')), 20000)),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('init timeout')), 60000)),
       ]);
     } catch (e: any) {
       console.warn('Extension init:', e?.message || e);
