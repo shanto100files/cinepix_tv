@@ -56,14 +56,11 @@
   flex: 0 0 30px;
   background-color: var(--primary);
   opacity: 0.72;
-  -webkit-mask-image: url("/cinepix-app-icon.png");
-  mask-image: url("/cinepix-app-icon.png");
-  -webkit-mask-position: center;
-  mask-position: center;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-size: 200% 200%;
-  mask-size: 200% 200%;
+  border-radius: 8px;
+  background-image: url("/cinepix-app-icon.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .sidebar-brand-name {
