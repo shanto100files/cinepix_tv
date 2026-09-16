@@ -286,7 +286,7 @@ export const PlayerPage: React.FC = () => {
       <div className="player-page">
         <div className="player-error">
           <p>No playback data provided.</p>
-          <button onClick={() => navigate(-1)}>Go Back</button>
+          <FocusableButton onClick={() => navigate(-1)}>Go Back</FocusableButton>
         </div>
       </div>
     );
@@ -1803,7 +1803,7 @@ const DesktopPlayer: React.FC<any> = ({
           style={{ background: bgUrl ? "transparent" : "#000" }}
         >
           <p>{streamError.message || "Failed to load stream"}</p>
-          <button onClick={() => navigate(-1)}>Go Back</button>
+          <FocusableButton onClick={() => navigate(-1)}>Go Back</FocusableButton>
         </div>
       </div>
     );

@@ -1,4 +1,5 @@
 import React from "react";
+import { FocusableButton } from "./layout/FocusableButton";
 
 interface Props {
   children: React.ReactNode;
@@ -74,7 +75,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
           >
             {this.state.error?.message || "An unexpected error occurred"}
           </p>
-          <button
+          <FocusableButton
             onClick={this.handleRetry}
             style={{
               padding: "12px 32px",
@@ -88,7 +89,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
             }}
           >
             Reload App
-          </button>
+          </FocusableButton>
         </div>
       );
     }

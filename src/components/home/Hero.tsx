@@ -21,8 +21,9 @@ interface HeroProps {
 export const Hero: React.FC<HeroProps> = ({ post }) => {
   const navigate = useNavigate();
   const { provider } = useContentStore();
+  const isAndroid = navigator.userAgent.toLowerCase().includes("android");
   const postProvider = post?.provider || provider?.value || "";
-  const tvMode = settingsStorage.isTvModeEnabled();
+  const tvMode = settingsStorage.isTvModeEnabled() || isAndroid;
 
   const { data: meta, isLoading: metaLoading } = useHeroMetadata(
     post?.link || "",

@@ -47,7 +47,8 @@ export const CatalogPage: React.FC = () => {
   const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null);
   const restoredRef = useRef(false);
 
-  const tvMode = settingsStorage.isTvModeEnabled();
+  const isAndroid = navigator.userAgent.toLowerCase().includes("android");
+  const tvMode = settingsStorage.isTvModeEnabled() || isAndroid;
   const { ref: focusRef, focusKey } = useFocusable({
     focusable: tvMode,
     trackChildren: true,

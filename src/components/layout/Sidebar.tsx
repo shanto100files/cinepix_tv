@@ -72,7 +72,8 @@ const NavigationDestination = ({
 export const Sidebar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const tvMode = settingsStorage.isTvModeEnabled();
+  const isAndroid = navigator.userAgent.toLowerCase().includes("android");
+  const tvMode = settingsStorage.isTvModeEnabled() || isAndroid;
   const user = useAuthStore((s) => s.user);
   const isAdmin = useAuthStore((s) => s.user?.is_admin);
   const [collapsed, setCollapsed] = React.useState(() =>

@@ -7,6 +7,7 @@ import {
 } from "react-icons/lu";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
+import { settingsStorage } from "../../lib/storage/SettingsStorage";
 import "./WindowControls.css";
 
 const appWindow = getCurrentWindow();
@@ -51,6 +52,8 @@ export const WindowControls: React.FC = () => {
   }, []);
 
   if (fullscreen) return null;
+  const isAndroid = navigator.userAgent.toLowerCase().includes("android");
+  if (settingsStorage.isTvModeEnabled() || isAndroid) return null;
 
   const toggleMaximize = async () => {
     try {

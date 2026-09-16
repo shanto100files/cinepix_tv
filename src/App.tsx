@@ -159,6 +159,22 @@ export default function App() {
   }, [tvMode]);
 
   useEffect(() => {
+    if (!tvMode) return;
+    const handleBack = (e: KeyboardEvent) => {
+      if (e.key === "Escape" || e.key === "Backspace" || e.key === "GoBack" || e.key === "BrowserBack") {
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+        if (document.querySelector("[data-dialog-open]")) return;
+        e.preventDefault();
+        e.stopPropagation();
+        window.history.back();
+      }
+    };
+    window.addEventListener("keydown", handleBack, true);
+    return () => window.removeEventListener("keydown", handleBack, true);
+  }, [tvMode]);
+
+  useEffect(() => {
     const handleDevtoolsShortcut = (event: KeyboardEvent) => {
       const isDevtoolsShortcut =
         event.key === "F12" ||

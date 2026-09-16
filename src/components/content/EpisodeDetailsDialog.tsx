@@ -29,7 +29,8 @@ export const EpisodeDetailsDialog: React.FC<EpisodeDetailsDialogProps> = ({
 }) => {
   const [imageFailed, setImageFailed] = useState(false);
   const image = getImageUrl(details?.image);
-  const tvMode = settingsStorage.isTvModeEnabled();
+  const isAndroid = navigator.userAgent.toLowerCase().includes("android");
+  const tvMode = settingsStorage.isTvModeEnabled() || isAndroid;
   const { ref, focusKey, focusSelf } = useFocusable({
     focusable: tvMode && Boolean(details),
     trackChildren: true,

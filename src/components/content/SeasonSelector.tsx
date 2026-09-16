@@ -23,7 +23,8 @@ export const SeasonSelector: React.FC<SeasonSelectorProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const instanceId = useId().replace(/:/g, "");
-  const tvMode = settingsStorage.isTvModeEnabled();
+  const isAndroid = navigator.userAgent.toLowerCase().includes("android");
+  const tvMode = settingsStorage.isTvModeEnabled() || isAndroid;
   const triggerFocusKey = `SEASON_SELECT_TRIGGER_${instanceId}`;
   const selectedIndex = Math.max(
     seasons.findIndex((season) => season.title === activeSeason?.title),
@@ -123,7 +124,8 @@ const SeasonOption: React.FC<{
   onSelect: () => void;
   focusKey: string;
 }> = ({ season, onSelect, focusKey }) => {
-  const tvMode = settingsStorage.isTvModeEnabled();
+  const isAndroid = navigator.userAgent.toLowerCase().includes("android");
+  const tvMode = settingsStorage.isTvModeEnabled() || isAndroid;
   const { ref, focused } = useFocusable({
     focusable: tvMode,
     focusKey,

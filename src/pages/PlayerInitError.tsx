@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { FocusableButton } from "../components/layout/FocusableButton";
 
 interface PlayerInitErrorProps {
   error: string;
@@ -58,20 +59,20 @@ export const PlayerInitError: React.FC<PlayerInitErrorProps> = ({
           </p>
         )}
         <div className="player-error-actions">
-          {onOpenVlc && <button onClick={onOpenVlc}>Open in VLC</button>}
-          <button onClick={handleCopy}>
+          {onOpenVlc && <FocusableButton onClick={onOpenVlc}>Open in VLC</FocusableButton>}
+          <FocusableButton onClick={handleCopy}>
             {copied ? "Copied" : "Copy Error"}
-          </button>
+          </FocusableButton>
           {isRuntimeError && (
-            <button
+            <FocusableButton
               onClick={() =>
                 openUrl("https://aka.ms/vs/17/release/vc_redist.x64.exe")
               }
             >
               Install Microsoft Runtime
-            </button>
+            </FocusableButton>
           )}
-          <button onClick={onBack}>Go Back</button>
+          <FocusableButton onClick={onBack}>Go Back</FocusableButton>
         </div>
       </div>
     </div>

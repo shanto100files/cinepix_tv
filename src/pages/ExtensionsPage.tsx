@@ -163,7 +163,8 @@ export const ExtensionsPage: React.FC = () => {
     useState<ProviderExtension | null>(null);
   const [settingsProvider, setSettingsProvider] =
     useState<ProviderExtension | null>(null);
-  const tvMode = settingsStorage.isTvModeEnabled();
+  const isAndroid = navigator.userAgent.toLowerCase().includes("android");
+  const tvMode = settingsStorage.isTvModeEnabled() || isAndroid;
 
   const refreshManifest = async (source: ProviderSource) => {
     try {
