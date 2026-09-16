@@ -138,7 +138,18 @@ export const MetaPage: React.FC = () => {
   const { watchList, addItem, removeItem } = useWatchListStore();
   const isAndroid = navigator.userAgent.toLowerCase().includes("android");
   const tvMode = settingsStorage.isTvModeEnabled() || isAndroid;
-  const { ref: focusRef, focusKey } = useFocusable({ focusable: tvMode, trackChildren: true });
+  const { ref: focusRef, focusKey, focusSelf } = useFocusable({
+    focusable: tvMode,
+    trackChildren: true,
+    preferredChildFocusKey: "CONTENT_BACK",
+  });
+
+  useEffect(() => {
+    if (tvMode) {
+      const timer = setTimeout(() => focusSelf(), 50);
+      return () => clearTimeout(timer);
+    }
+  }, [tvMode, focusSelf]);
 
   const link = decodeURIComponent(url || "");
   const activeProviderValue = searchParams.get("provider") || provider?.value || "";

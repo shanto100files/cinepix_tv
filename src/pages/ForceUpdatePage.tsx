@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { LuX } from 'react-icons/lu';
 
 const API_BASE = 'https://cinepix.top/api/app';
 
 export function ForceUpdatePage({ killSwitchBlocked, reason }: { killSwitchBlocked?: boolean; reason?: string }) {
   const [downloading, setDownloading] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
 
   const handleDownload = async () => {
     setDownloading(true);
@@ -23,9 +25,20 @@ export function ForceUpdatePage({ killSwitchBlocked, reason }: { killSwitchBlock
     setTimeout(() => setDownloading(false), 3000);
   };
 
+  if (dismissed) {
+    window.history.back();
+    return null;
+  }
+
   if (killSwitchBlocked) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[var(--background)] px-8">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[var(--background)] px-8 relative">
+        <button
+          onClick={() => setDismissed(true)}
+          className="absolute top-4 right-4 p-2 rounded-lg text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container)] transition-colors"
+        >
+          <LuX size={24} />
+        </button>
         <div className="text-6xl mb-6">🔒</div>
         <h1 className="text-2xl font-bold text-[var(--on-surface)] mb-4">Access Restricted</h1>
         <p className="text-[var(--on-surface-variant)] text-center max-w-md">
@@ -36,7 +49,13 @@ export function ForceUpdatePage({ killSwitchBlocked, reason }: { killSwitchBlock
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[var(--background)] px-8">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[var(--background)] px-8 relative">
+      <button
+        onClick={() => setDismissed(true)}
+        className="absolute top-4 right-4 p-2 rounded-lg text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container)] transition-colors"
+      >
+        <LuX size={24} />
+      </button>
       <div className="text-6xl mb-6">⬆️</div>
       <h1 className="text-2xl font-bold text-[var(--on-surface)] mb-4">Update Available</h1>
       <p className="text-[var(--on-surface-variant)] text-center max-w-md mb-8">

@@ -1,4 +1,5 @@
 import React, { useCallback, useRef, useState, useEffect } from "react";
+import { FocusableButton } from "../components/layout/FocusableButton";
 import {
   LuArrowLeft as ArrowLeft,
   LuPlay as Play,
@@ -486,9 +487,9 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
 
       {/* Top bar */}
       <div className="player-top-bar">
-        <button className="player-back-btn" onClick={onBack}>
+        <FocusableButton className="player-back-btn" onClick={onBack} focusKey="PLAYER_BACK">
           <ArrowLeft size={22} />
-        </button>
+        </FocusableButton>
         <div className="player-title-group">
           <span className="player-primary-title">{primaryTitle}</span>
           {secondaryTitle && (
