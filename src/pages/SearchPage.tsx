@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { LuSearch as Search, LuX as X, LuTv as Tv, LuFilm as Film } from "react-icons/lu";
 import { useGlobalSearch } from "../lib/hooks/useGlobalSearch";
@@ -9,6 +9,7 @@ import { FocusContext, useFocusable } from "@noriginmedia/norigin-spatial-naviga
 import { resume, setFocus } from "@noriginmedia/norigin-spatial-navigation-core";
 import { fetchIMDbSuggestions, type IMDbSuggestion } from "../lib/services/imdbSuggestions";
 import { settingsStorage } from "../lib/storage";
+import type { Post } from "../lib/providers/types";
 import "./SearchPage.css";
 
 const FocusableSuggestionItem: React.FC<{
@@ -91,6 +92,34 @@ export const SearchPage: React.FC = () => {
 
   const { mergedPosts, emptyResults, loading, isAllLoaded } =
     useGlobalSearch(query);
+
+  const [hideNSFW, setHideNSFW] = useState(true);
+
+  const NSFW_KEYWORDS = /\b(porn|xxx|sex|nude|naked|erotic|adult|18\+|uncensored|hentai|leaked|mms|scandal|bf|gf|hot|sexy|desi\s*mms)\b/i;
+
+  const { exactPosts, similarPosts } = useMemo(() => {
+    if (!query.trim()) return { exactPosts: mergedPosts, similarPosts: [] };
+    const q = query.toLowerCase().trim();
+    const words = q.split(/\s+/).filter(Boolean);
+    const exact: Post[] = [];
+    const similar: Post[] = [];
+    for (const post of mergedPosts) {
+      const title = (post.title || "").toLowerCase();
+      const isExact = words.some((w) => title.includes(w));
+      if (isExact) exact.push(post);
+      else similar.push(post);
+    }
+    return { exactPosts: exact, similarPosts: similar };
+  }, [mergedPosts, query]);
+
+  const filteredExact = useMemo(
+    () => (hideNSFW ? exactPosts.filter((p) => !NSFW_KEYWORDS.test(p.title)) : exactPosts),
+    [exactPosts, hideNSFW],
+  );
+  const filteredSimilar = useMemo(
+    () => (hideNSFW ? similarPosts.filter((p) => !NSFW_KEYWORDS.test(p.title)) : similarPosts),
+    [similarPosts, hideNSFW],
+  );
 
   useEffect(() => {
     suppressSuggestionsRef.current = true;
@@ -290,6 +319,14 @@ export const SearchPage: React.FC = () => {
             {isAllLoaded ? "Searched for" : "Searching for"}{" "}
             <span className="text-primary">"{query}"</span>
           </p>
+          <label className="nsfw-filter-toggle">
+            <input
+              type="checkbox"
+              checked={hideNSFW}
+              onChange={(e) => setHideNSFW(e.target.checked)}
+            />
+            <span>18+ off</span>
+          </label>
         </div>
       )}
 
@@ -305,23 +342,52 @@ export const SearchPage: React.FC = () => {
           </div>
         )}
 
-      {query && (
-        <div className="search-grid pb-xl">
-          {mergedPosts.map((post, index) => (
-            <PostCardItem
-              key={`${post.link}-${index}`}
-              post={post}
-              onClick={() => {
-                const params = new URLSearchParams();
-                if (post.provider) params.append("provider", post.provider);
-                if (post.image) params.append("poster", post.image);
-                navigate(
-                  `/content/${encodeURIComponent(post.link)}?${params.toString()}`,
-                );
-              }}
-            />
-          ))}
-        </div>
+      {query && filteredExact.length > 0 && (
+        <>
+          <div className="search-section-header">
+            <h3>Results for &quot;{query}&quot;</h3>
+          </div>
+          <div className="search-grid pb-xl">
+            {filteredExact.map((post, index) => (
+              <PostCardItem
+                key={`exact-${post.link}-${index}`}
+                post={post}
+                onClick={() => {
+                  const params = new URLSearchParams();
+                  if (post.provider) params.append("provider", post.provider);
+                  if (post.image) params.append("poster", post.image);
+                  navigate(
+                    `/content/${encodeURIComponent(post.link)}?${params.toString()}`,
+                  );
+                }}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {query && filteredSimilar.length > 0 && (
+        <>
+          <div className="search-section-header">
+            <h3>Similar Results</h3>
+          </div>
+          <div className="search-grid pb-xl">
+            {filteredSimilar.map((post, index) => (
+              <PostCardItem
+                key={`similar-${post.link}-${index}`}
+                post={post}
+                onClick={() => {
+                  const params = new URLSearchParams();
+                  if (post.provider) params.append("provider", post.provider);
+                  if (post.image) params.append("poster", post.image);
+                  navigate(
+                    `/content/${encodeURIComponent(post.link)}?${params.toString()}`,
+                  );
+                }}
+              />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

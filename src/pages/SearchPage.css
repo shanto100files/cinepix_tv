@@ -319,3 +319,38 @@
   margin-left: 8px;
 }
 
+.search-results-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-l) var(--spacing-m);
+}
+
+.search-section-header {
+  padding: var(--spacing-m) var(--spacing-l) var(--spacing-s);
+}
+
+.search-section-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--on-surface);
+}
+
+.nsfw-filter-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--on-surface-variant);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.nsfw-filter-toggle input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
