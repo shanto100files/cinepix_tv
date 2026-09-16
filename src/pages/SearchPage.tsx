@@ -95,33 +95,21 @@ export const SearchPage: React.FC = () => {
 
   const [hideNSFW, setHideNSFW] = useState(true);
 
-  const NSFW_KEYWORDS = /\b(porn|xxx|sex|nude|naked|erotic|adult|18\+|uncensored|hentai|leaked|mms|scandal|bf|gf|hot|sexy|desi\s*mms)\b/i;
+  const NSFW_KEYWORDS = /\b(porn|xxx|sex|nude|naked|erotic|adult|18\+|uncensored|hentai|leaked|mms|scandal|bf|gf|hot|sexy|desi\s*mms|dirty|lust|seduce|stepmom|stepsis|massage|creampie|blowjob|handjob|gangbang|threesome|milf|camgirl|onlyfans|playboy|penthouse)\b/i;
 
-  const { exactPosts, similarPosts } = useMemo(() => {
-    if (!query.trim()) return { exactPosts: mergedPosts, similarPosts: [] };
+  const filteredPosts = useMemo(() => {
     const q = query.toLowerCase().trim();
     const words = q.split(/\s+/).filter(Boolean);
-    const exact: Post[] = [];
-    const similar: Post[] = [];
-    for (const post of mergedPosts) {
-      const title = (post.title || "").toLowerCase();
+    return mergedPosts.filter((p) => {
+      if (hideNSFW && NSFW_KEYWORDS.test(p.title)) return false;
+      if (!q) return true;
+      const title = (p.title || "").toLowerCase();
       const fullMatch = title.includes(q);
+      if (fullMatch) return true;
       const wordMatches = words.filter((w) => w.length > 2 && title.includes(w)).length;
-      const closeToFull = wordMatches >= Math.ceil(words.length * 0.6);
-      if (fullMatch || closeToFull) exact.push(post);
-      else if (wordMatches > 0) similar.push(post);
-    }
-    return { exactPosts: exact, similarPosts: similar };
-  }, [mergedPosts, query]);
-
-  const filteredExact = useMemo(
-    () => (hideNSFW ? exactPosts.filter((p) => !NSFW_KEYWORDS.test(p.title)) : exactPosts),
-    [exactPosts, hideNSFW],
-  );
-  const filteredSimilar = useMemo(
-    () => (hideNSFW ? similarPosts.filter((p) => !NSFW_KEYWORDS.test(p.title)) : similarPosts),
-    [similarPosts, hideNSFW],
-  );
+      return wordMatches >= Math.ceil(words.length * 0.6);
+    });
+  }, [mergedPosts, query, hideNSFW]);
 
   useEffect(() => {
     suppressSuggestionsRef.current = true;
@@ -344,52 +332,23 @@ export const SearchPage: React.FC = () => {
           </div>
         )}
 
-      {query && filteredExact.length > 0 && (
-        <>
-          <div className="search-section-header">
-            <h3>Results for &quot;{query}&quot;</h3>
-          </div>
-          <div className="search-grid pb-xl">
-            {filteredExact.map((post, index) => (
-              <PostCardItem
-                key={`exact-${post.link}-${index}`}
-                post={post}
-                onClick={() => {
-                  const params = new URLSearchParams();
-                  if (post.provider) params.append("provider", post.provider);
-                  if (post.image) params.append("poster", post.image);
-                  navigate(
-                    `/content/${encodeURIComponent(post.link)}?${params.toString()}`,
-                  );
-                }}
-              />
-            ))}
-          </div>
-        </>
-      )}
-
-      {query && filteredSimilar.length > 0 && (
-        <>
-          <div className="search-section-header">
-            <h3>Similar Results</h3>
-          </div>
-          <div className="search-grid pb-xl">
-            {filteredSimilar.map((post, index) => (
-              <PostCardItem
-                key={`similar-${post.link}-${index}`}
-                post={post}
-                onClick={() => {
-                  const params = new URLSearchParams();
-                  if (post.provider) params.append("provider", post.provider);
-                  if (post.image) params.append("poster", post.image);
-                  navigate(
-                    `/content/${encodeURIComponent(post.link)}?${params.toString()}`,
-                  );
-                }}
-              />
-            ))}
-          </div>
-        </>
+      {query && filteredPosts.length > 0 && (
+        <div className="search-grid pb-xl">
+          {filteredPosts.map((post, index) => (
+            <PostCardItem
+              key={`${post.link}-${index}`}
+              post={post}
+              onClick={() => {
+                const params = new URLSearchParams();
+                if (post.provider) params.append("provider", post.provider);
+                if (post.image) params.append("poster", post.image);
+                navigate(
+                  `/content/${encodeURIComponent(post.link)}?${params.toString()}`,
+                );
+              }}
+            />
+          ))}
+        </div>
       )}
     </div>
   );
