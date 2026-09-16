@@ -1,6 +1,7 @@
 import React from "react";
 import { LuArrowLeft as ArrowLeft } from "react-icons/lu";
-import { FocusableButton } from "../layout/FocusableButton";
+import { useFocusable } from "@noriginmedia/norigin-spatial-navigation-react";
+import { settingsStorage } from "../../lib/storage/SettingsStorage";
 
 interface ContentHeroProps {
   title: string;
@@ -34,6 +35,14 @@ export const ContentHero: React.FC<ContentHeroProps> = ({
     .filter((item, index, items) => items.indexOf(item) === index)
     .slice(0, 6);
 
+  const isAndroid = navigator.userAgent.toLowerCase().includes("android");
+  const tvMode = settingsStorage.isTvModeEnabled() || isAndroid;
+  const { ref, focused } = useFocusable({
+    focusable: tvMode,
+    focusKey: "CONTENT_BACK",
+    onEnterPress: onBack,
+  });
+
   return (
     <section className="content-hero" aria-labelledby="content-detail-title">
       <div className="content-hero-media">
@@ -43,14 +52,15 @@ export const ContentHero: React.FC<ContentHeroProps> = ({
           aria-hidden="true"
         />
         <div className="content-hero-scrim" />
-        <FocusableButton
-          className="content-back-button"
+        <button
+          ref={ref as any}
+          className={`content-back-button${focused ? " tv-focus" : ""}`}
           onClick={onBack}
-          focusKey="CONTENT_BACK"
           title="Go back"
+          type="button"
         >
           <ArrowLeft size={22} />
-        </FocusableButton>
+        </button>
       </div>
 
       <div className="content-hero-inner">
