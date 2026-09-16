@@ -105,9 +105,11 @@ export const SearchPage: React.FC = () => {
     const similar: Post[] = [];
     for (const post of mergedPosts) {
       const title = (post.title || "").toLowerCase();
-      const isExact = words.some((w) => title.includes(w));
-      if (isExact) exact.push(post);
-      else similar.push(post);
+      const fullMatch = title.includes(q);
+      const wordMatches = words.filter((w) => w.length > 2 && title.includes(w)).length;
+      const closeToFull = wordMatches >= Math.ceil(words.length * 0.6);
+      if (fullMatch || closeToFull) exact.push(post);
+      else if (wordMatches > 0) similar.push(post);
     }
     return { exactPosts: exact, similarPosts: similar };
   }, [mergedPosts, query]);
