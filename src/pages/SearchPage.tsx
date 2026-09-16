@@ -9,7 +9,6 @@ import { FocusContext, useFocusable } from "@noriginmedia/norigin-spatial-naviga
 import { resume, setFocus } from "@noriginmedia/norigin-spatial-navigation-core";
 import { fetchIMDbSuggestions, type IMDbSuggestion } from "../lib/services/imdbSuggestions";
 import { settingsStorage } from "../lib/storage";
-import type { Post } from "../lib/providers/types";
 import "./SearchPage.css";
 
 const FocusableSuggestionItem: React.FC<{
