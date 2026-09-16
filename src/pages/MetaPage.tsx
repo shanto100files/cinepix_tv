@@ -643,6 +643,7 @@ export const MetaPage: React.FC = () => {
                       download={storedDownload}
                       hasDownloadedSubtitles={hasDownloadedSubtitles}
                       extracting={extractingId === id}
+                      showDownload={!tvMode}
                       onPlay={() => play(playableRows, index, rowType)}
                       onDownload={(e) => {
                         const isLongPress = Boolean(e?.ctrlKey || e?.metaKey);

@@ -83,6 +83,7 @@ interface EpisodeRowProps {
   download?: DownloadItem;
   hasDownloadedSubtitles?: boolean;
   extracting: boolean;
+  showDownload?: boolean;
   onPlay: () => void;
   onDownload: (
     event?:
@@ -127,6 +128,7 @@ export const EpisodeRow: React.FC<EpisodeRowProps> = ({
   download,
   hasDownloadedSubtitles,
   extracting,
+  showDownload = true,
   onPlay,
   onDownload,
   onDeleteDownload: _onDeleteDownload,
@@ -301,6 +303,7 @@ export const EpisodeRow: React.FC<EpisodeRowProps> = ({
         </span>
       </FocusableButton>
 
+      {showDownload && (
       <div className="content-episode-download">
         {extracting ? (
           <span
@@ -372,6 +375,7 @@ export const EpisodeRow: React.FC<EpisodeRowProps> = ({
           </FocusableButton>
         )}
       </div>
+      )}
     </article>
   );
 };
