@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { client } from "./lib/client";
 import { Layout } from "./components/layout/Layout";
@@ -43,6 +43,34 @@ import { ToastContainer } from "./components/ui/ToastContainer";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
 let isNavInitialized = false;
+
+function BackHandler() {
+  const navigate = useNavigate();
+  const isAndroid = navigator.userAgent.toLowerCase().includes("android");
+  const tvMode = settingsStorage.isTvModeEnabled() || isAndroid;
+
+  useEffect(() => {
+    if (!tvMode) return;
+    let lastBack = 0;
+    const handleBack = (e: KeyboardEvent) => {
+      if (e.key === "Escape" || e.key === "Backspace" || e.key === "GoBack" || e.key === "BrowserBack") {
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+        if (document.querySelector("[data-dialog-open]")) return;
+        const now = Date.now();
+        if (now - lastBack < 400) return;
+        lastBack = now;
+        e.preventDefault();
+        e.stopPropagation();
+        navigate(-1);
+      }
+    };
+    window.addEventListener("keydown", handleBack, true);
+    return () => window.removeEventListener("keydown", handleBack, true);
+  }, [tvMode, navigate]);
+
+  return null;
+}
 
 export default function App() {
   initDownloadListeners();
@@ -159,26 +187,6 @@ export default function App() {
   }, [tvMode]);
 
   useEffect(() => {
-    if (!tvMode) return;
-    let lastBack = 0;
-    const handleBack = (e: KeyboardEvent) => {
-      if (e.key === "Escape" || e.key === "Backspace" || e.key === "GoBack" || e.key === "BrowserBack") {
-        const tag = (e.target as HTMLElement)?.tagName;
-        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
-        if (document.querySelector("[data-dialog-open]")) return;
-        const now = Date.now();
-        if (now - lastBack < 400) return;
-        lastBack = now;
-        e.preventDefault();
-        e.stopPropagation();
-        window.history.back();
-      }
-    };
-    window.addEventListener("keydown", handleBack, true);
-    return () => window.removeEventListener("keydown", handleBack, true);
-  }, [tvMode]);
-
-  useEffect(() => {
     const handleDevtoolsShortcut = (event: KeyboardEvent) => {
       const isDevtoolsShortcut =
         event.key === "F12" ||
@@ -242,6 +250,7 @@ export default function App() {
       <WafDialog />
       <ToastContainer />
       <BrowserRouter>
+        <BackHandler />
         <WindowControls />
         <Routes>
           <Route path="player" element={<PlayerPage />} />
