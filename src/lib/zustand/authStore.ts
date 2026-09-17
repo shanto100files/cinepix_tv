@@ -61,7 +61,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
       const res = await fetch(`${API_BASE}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-App-Key': HARDCODED_KEY },
-        body: JSON.stringify({ username, password, device_id: deviceId, app_version: '5.5.9' }),
+        body: JSON.stringify({ username, password, device_id: deviceId, app_version: '5.6.0' }),
       });
       const data = await res.json();
       if (data.token) {
