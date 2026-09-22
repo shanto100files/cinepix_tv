@@ -16,7 +16,26 @@
   height: 100%;
   background-size: cover;
   background-position: center;
-  transition: background-image 0.5s ease-in-out;
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+/* Cross in only after the image has fully decoded */
+.hero-background.ready {
+  opacity: 1;
+  transition: opacity 600ms ease-out;
+  animation: hero-kenburns 18s ease-in-out infinite alternate;
+}
+
+@keyframes hero-kenburns {
+  from { transform: scale(1) translateX(0); }
+  to { transform: scale(1.06) translateX(-1.2%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-background.ready {
+    animation: none;
+  }
 }
 
 .hero-vignette {

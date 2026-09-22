@@ -11,7 +11,7 @@ import { ContentSlider } from "../components/home/ContentSlider";
 import { LuRefreshCw as RefreshCw } from "react-icons/lu";
 import useWatchHistoryStore from "../lib/zustand/watchHistrory";
 import { FocusableButton } from "../components/layout/FocusableButton";
-import { PostCardItem } from "../components/home/PostCardItem";
+import { PostCardItemMemo as PostCardItem } from "../components/home/PostCardItem";
 import { Spinner } from "../components/ui/spinner";
 import { AdBox } from "../components/ui/AdBox";
 import useAdStore from "../lib/zustand/adStore";

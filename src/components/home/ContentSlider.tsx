@@ -12,7 +12,8 @@ import {
   useFocusable,
   FocusContext,
 } from "@noriginmedia/norigin-spatial-navigation-react";
-import { PostCardItem, Post } from "./PostCardItem";
+import { PostCardItemMemo as PostCardItem, Post } from "./PostCardItem";
+import { PostCardItemLazy } from "./PostCardItemLazy";
 import { FocusableButton } from "../layout/FocusableButton";
 import { Skeleton } from "../ui/skeleton";
 import "./ContentSlider.css";
@@ -157,12 +158,21 @@ export const ContentSlider: React.FC<ContentSliderProps> = ({
                 className="content-slider-slide"
                 key={`${post.link}-${index}`}
                 virtualIndex={index}>
-                <PostCardItem
-                  post={post}
-                  focusKey={`CARD_${sanitizedTitle}_${index}_${post.link.replace(/[^a-zA-Z0-9_-]/g, "_")}`}
-                  onClick={handlePostClick}
-                  onRemove={onRemove}
-                />
+                {index < 6 ? (
+                  <PostCardItem
+                    post={post}
+                    focusKey={`CARD_${sanitizedTitle}_${index}_${post.link.replace(/[^a-zA-Z0-9_-]/g, "_")}`}
+                    onClick={handlePostClick}
+                    onRemove={onRemove}
+                  />
+                ) : (
+                  <PostCardItemLazy
+                    post={post}
+                    focusKey={`CARD_${sanitizedTitle}_${index}_${post.link.replace(/[^a-zA-Z0-9_-]/g, "_")}`}
+                    onClick={handlePostClick}
+                    onRemove={onRemove}
+                  />
+                )}
               </SwiperSlide>
             ))}
           </Swiper>

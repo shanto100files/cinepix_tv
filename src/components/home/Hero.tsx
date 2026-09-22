@@ -43,6 +43,18 @@ export const Hero: React.FC<HeroProps> = ({ post }) => {
     }
   }, [post?.image]);
 
+  // Preload the hero image and only cross it in once decoded — avoids the
+  // half-loaded background flash on slow connections.
+  const [bgReady, setBgReady] = React.useState(false);
+  React.useEffect(() => {
+    setBgReady(false);
+    const url = meta?.background || meta?.image || post?.image;
+    if (!url) return;
+    const img = new Image();
+    img.onload = () => setBgReady(true);
+    img.src = url;
+  }, [meta?.background, meta?.image, post?.image]);
+
   const handlePlayClick = () => {
     if (post) {
       const params = new URLSearchParams();
@@ -92,7 +104,7 @@ export const Hero: React.FC<HeroProps> = ({ post }) => {
   return (
     <div className="hero-container">
       <div
-        className="hero-background"
+        className={`hero-background${bgReady ? " ready" : ""}`}
         style={{ backgroundImage: `url(${bgImage})` }}
       />
       <div className="hero-vignette" />

@@ -65,8 +65,12 @@ export const PostCardItem: React.FC<PostCardItemProps> = ({
   const isAndroid = navigator.userAgent.toLowerCase().includes("android");
   const tvMode = settingsStorage.isTvModeEnabled() || isAndroid;
   const [imageFailed, setImageFailed] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
-  useEffect(() => setImageFailed(false), [post.image]);
+  useEffect(() => {
+    setImageFailed(false);
+    setImageLoaded(false);
+  }, [post.image]);
 
   const progressPalette = useArtworkPalette(
     post.progress !== undefined ? post.image : null,
@@ -212,15 +216,26 @@ export const PostCardItem: React.FC<PostCardItemProps> = ({
             4K
           </span>
         )}
-        {post.image && !imageFailed && (
+        {post.image && !imageFailed ? (
           <img
             src={post.image}
             alt=""
-            className="post-image"
+            className={`post-image${imageLoaded ? " loaded" : ""}`}
             loading="lazy"
+            decoding="async"
             referrerPolicy="no-referrer"
+            onLoad={() => setImageLoaded(true)}
             onError={() => setImageFailed(true)}
           />
+        ) : (
+          <div
+            className="post-image post-image-fallback"
+            aria-hidden="true"
+          >
+            <span className="post-image-fallback-initial">
+              {(post.title || "C").trim().charAt(0).toUpperCase()}
+            </span>
+          </div>
         )}
         {onRemove && (
           <button
@@ -262,3 +277,5 @@ export const PostCardItem: React.FC<PostCardItemProps> = ({
     </div>
   );
 };
+
+export const PostCardItemMemo = React.memo(PostCardItem);

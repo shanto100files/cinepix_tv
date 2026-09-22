@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { LuSearch as Search, LuX as X, LuTv as Tv, LuFilm as Film } from "react-icons/lu";
 import { useGlobalSearch } from "../lib/hooks/useGlobalSearch";
-import { PostCardItem } from "../components/home/PostCardItem";
+import { PostCardItemMemo as PostCardItem } from "../components/home/PostCardItem";
 import { FocusableButton } from "../components/layout/FocusableButton";
 import { Spinner } from "../components/ui/spinner";
 import { FocusContext, useFocusable } from "@noriginmedia/norigin-spatial-navigation-react";
