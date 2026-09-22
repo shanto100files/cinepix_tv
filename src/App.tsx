@@ -53,7 +53,9 @@ function BackHandler() {
     if (!tvMode) return;
     let lastBack = 0;
     const handleBack = (e: KeyboardEvent) => {
-      if (e.key === "Escape" || e.key === "Backspace" || e.key === "GoBack" || e.key === "BrowserBack") {
+      // Android TV remotes fire Backspace for the Back button; on desktop TV mode
+      // Backspace must keep working in text fields, so inputs are excluded below.
+      if (e.key === "Escape" || e.key === "GoBack" || e.key === "BrowserBack" || (isAndroid && e.key === "Backspace")) {
         const tag = (e.target as HTMLElement)?.tagName;
         if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
         if (document.querySelector("[data-dialog-open]")) return;
@@ -67,7 +69,7 @@ function BackHandler() {
     };
     window.addEventListener("keydown", handleBack, true);
     return () => window.removeEventListener("keydown", handleBack, true);
-  }, [tvMode, navigate]);
+  }, [tvMode, navigate, isAndroid]);
 
   return null;
 }
@@ -176,7 +178,9 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (tvMode && !isNavInitialized) {
+    const isAndroid = navigator.userAgent.toLowerCase().includes("android");
+    const spatialNavEnabled = tvMode || isAndroid;
+    if (spatialNavEnabled && !isNavInitialized) {
       initNavigation({
         debug: false,
         visualDebug: false,

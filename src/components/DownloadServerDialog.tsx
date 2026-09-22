@@ -150,6 +150,7 @@ export const DownloadServerDialog: React.FC<DownloadServerDialogProps> = ({
           className="download-dialog-content"
           role="dialog"
           aria-modal="true"
+          data-dialog-open="true"
           aria-labelledby="download-dialog-title"
           onClick={(e) => e.stopPropagation()}
           ref={focusRef as any}

@@ -70,6 +70,7 @@ export const EpisodeDetailsDialog: React.FC<EpisodeDetailsDialogProps> = ({
           role="dialog"
           aria-modal="true"
           aria-labelledby="episode-details-title"
+          data-dialog-open="true"
         >
           <FocusableButton
             className="episode-details-close"

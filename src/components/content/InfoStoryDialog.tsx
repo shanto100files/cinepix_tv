@@ -299,6 +299,7 @@ export function InfoStoryDialog({
       role="dialog"
       aria-modal="true"
       aria-label={`${title} information`}
+      data-dialog-open="true"
       onClick={handleHalfClick}
     >
       <div className="info-story-orb" />

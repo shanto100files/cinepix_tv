@@ -15,7 +15,8 @@ export const Layout: React.FC = () => {
   const isContentPage =
     location.pathname.startsWith("/content/") ||
     location.pathname.startsWith("/watchlist/content/");
-  const tvMode = settingsStorage.isTvModeEnabled();
+  const isAndroid = navigator.userAgent.toLowerCase().includes("android");
+  const tvMode = settingsStorage.isTvModeEnabled() || isAndroid;
 
   const { ref, focusKey, focusSelf } = useFocusable({
     focusable: tvMode,

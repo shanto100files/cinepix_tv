@@ -116,6 +116,7 @@ export const SearchSubtitlesModal: React.FC<SearchSubtitlesModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="subtitle-search-title"
+        data-dialog-open="true"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
