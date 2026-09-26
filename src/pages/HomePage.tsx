@@ -154,6 +154,7 @@ export const HomePage: React.FC = () => {
                     if (post.image) params.append("poster", post.image);
                     navigate(
                       `/content/${encodeURIComponent(post.link)}?${params.toString()}`,
+                      { state: { from: "/" } },
                     );
                   }}
                 />
@@ -240,7 +241,7 @@ export const HomePage: React.FC = () => {
             providerValue={provider?.value}
           />
         ))}
-        <AdBox url={bottomAdUrl} />
+        <AdBox url={bottomAdUrl} height={160} />
       </div>
     </div>
   );

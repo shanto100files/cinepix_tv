@@ -25,6 +25,10 @@ export interface ProviderExtension {
   lastUpdated?: number;
   hasSettings?: boolean;
   show_on_home?: boolean;
+  /** 18+ provider - hidden unless the user passes the age gate. */
+  is_adult?: boolean;
+  /** 'all' = usable freely, 'selected' = requires premium/selection on server. */
+  access_mode?: string;
 }
 
 /**

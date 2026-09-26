@@ -56,6 +56,9 @@ export enum SettingsKeys {
   VLC_ENABLED = "vlcEnabled",
   VLC_PATH = "vlcPath",
   PLAYER_ZOOM = "playerZoom",
+
+  // 18+ content gate
+  ADULT_ENABLED = "adultEnabled",
 }
 
 /**
@@ -439,6 +442,15 @@ export class SettingsStorage {
 
   setPlayerZoom(zoom: number): void {
     mainStorage.setNumber(SettingsKeys.PLAYER_ZOOM, zoom);
+  }
+
+  /** 18+ providers/content are hidden until the user passes the age gate. */
+  isAdultEnabled(): boolean {
+    return mainStorage.getBool(SettingsKeys.ADULT_ENABLED, false);
+  }
+
+  setAdultEnabled(enabled: boolean): void {
+    mainStorage.setBool(SettingsKeys.ADULT_ENABLED, enabled);
   }
 }
 

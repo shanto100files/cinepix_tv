@@ -2,6 +2,7 @@ import React from "react";
 import { LuArrowLeft as ArrowLeft } from "react-icons/lu";
 import { useFocusable } from "@noriginmedia/norigin-spatial-navigation-react";
 import { settingsStorage } from "../../lib/storage/SettingsStorage";
+import { isAdultTitle } from "../../lib/utils/adultGate";
 
 interface ContentHeroProps {
   title: string;
@@ -43,14 +44,39 @@ export const ContentHero: React.FC<ContentHeroProps> = ({
     onEnterPress: onBack,
   });
 
+  // 18+ content (adult provider or erotic title) is blurred until the user
+  // explicitly reveals it, unless the age gate is enabled in Settings.
+  const [adultRevealed, setAdultRevealed] = React.useState(false);
+  const isAdultHero =
+    isAdultTitle(title) ||
+    /18\+|adult|erotic/i.test(
+      (tags || []).join(" ") || "",
+    );
+  const blurAdult = isAdultHero && !adultRevealed && !settingsStorage.isAdultEnabled();
+
   return (
     <section className="content-hero" aria-labelledby="content-detail-title">
       <div className="content-hero-media">
         <div
           className="content-hero-artwork"
-          style={{ backgroundImage: background ? `url(${background})` : undefined }}
+          style={{
+            backgroundImage: background ? `url(${background})` : undefined,
+            ...(blurAdult
+              ? { filter: "blur(18px) saturate(0.5)", transform: "scale(1.08)" }
+              : {}),
+          }}
           aria-hidden="true"
         />
+        {blurAdult && (
+          <button
+            type="button"
+            className="content-hero-adult-reveal"
+            onClick={() => setAdultRevealed(true)}
+          >
+            <span className="post-adult-badge">18+</span>
+            <span>Click to reveal</span>
+          </button>
+        )}
         <div className="content-hero-scrim" />
         <button
           ref={ref as any}

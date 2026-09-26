@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
+import { LuCrown, LuCheck, LuSparkles, LuZap, LuShieldCheck, LuClock3 } from 'react-icons/lu';
 import useAuthStore from '../lib/zustand/authStore';
 import { trackEvent } from '../lib/services/analyticsService';
+import { FocusableButton } from '../components/layout/FocusableButton';
+import './PremiumPage.css';
 
 const API_BASE = 'https://cinepix.top/api/app';
 const HARDCODED_KEY = '78a0e573dfd894d443685159b2e71e2f';
@@ -13,6 +16,8 @@ interface Package {
   duration_days: number;
   features: string;
 }
+
+const PLAN_ICONS = [LuClock3, LuZap, LuSparkles, LuCrown];
 
 export function PremiumPage() {
   const [packages, setPackages] = useState<Package[]>([]);
@@ -76,75 +81,127 @@ export function PremiumPage() {
   };
 
   if (isPremium) {
+    const expiry = user?.premium_expires_at
+      ? new Date(user.premium_expires_at).toLocaleDateString(undefined, {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+        })
+      : null;
     return (
-      <div className="p-6 max-w-2xl mx-auto">
-        <div className="rounded-2xl bg-[var(--surface-container)] border border-[var(--outline-variant)] p-8 text-center">
-          <div className="text-5xl mb-4">👑</div>
-          <h1 className="text-2xl font-bold text-[var(--on-surface)] mb-2">Premium Active</h1>
-          <p className="text-[var(--on-surface-variant)]">You have an active premium subscription.</p>
-          {user?.premium_expires_at && (
-            <p className="text-sm text-[var(--on-surface-variant)] mt-2">Expires: {new Date(user.premium_expires_at).toLocaleDateString()}</p>
-          )}
+      <div className="premium-page">
+        <div className="premium-active-card">
+          <div className="premium-active-glow" aria-hidden="true" />
+          <div className="premium-active-crown">
+            <LuCrown size={30} />
+          </div>
+          <h1 className="premium-active-title">Premium Active</h1>
+          <p className="premium-active-sub">
+            Ad-free streaming, every provider, priority support — the full experience.
+          </p>
+          {expiry && <p className="premium-active-until">Valid until {expiry}</p>}
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-[var(--on-surface)] mb-6">Premium Plans</h1>
+  const cheapest = packages.length
+    ? Math.min(...packages.map(p => p.price))
+    : 0;
 
-      <div className="space-y-3 mb-6">
-        {packages.map(pkg => (
-          <div
-            key={pkg.id}
-            onClick={() => setSelectedPkg(pkg)}
-            className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
-              selectedPkg?.id === pkg.id
-                ? 'border-[var(--primary)] bg-[var(--primary-container)]'
-                : 'border-[var(--outline-variant)] bg-[var(--surface-container)] hover:border-[var(--primary)]'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-semibold text-[var(--on-surface)]">{pkg.name}</h3>
-                <p className="text-sm text-[var(--on-surface-variant)]">{pkg.duration_days} days</p>
-              </div>
-              <div className="text-right">
-                <span className="text-xl font-bold text-[var(--primary)]">৳{pkg.price}</span>
-              </div>
-            </div>
-            {pkg.features && (
-              <p className="text-xs text-[var(--on-surface-variant)] mt-2">{pkg.features}</p>
-            )}
-          </div>
-        ))}
+  return (
+    <div className="premium-page">
+      {/* Header */}
+      <div className="premium-header">
+        <div className="premium-header-crown">
+          <LuCrown size={26} />
+        </div>
+        <div>
+          <h1 className="headline-lg premium-title">Go Premium</h1>
+          <p className="premium-subtitle">
+            Unlock every provider, zero ads, priority support.
+          </p>
+        </div>
       </div>
 
-      {selectedPkg && (
-        <div className="rounded-2xl bg-[var(--surface-container)] border border-[var(--outline-variant)] p-6 space-y-4">
-          <h3 className="font-semibold text-[var(--on-surface)]">Payment Details</h3>
+      {/* Perks strip */}
+      <div className="premium-perks">
+        <div className="premium-perk"><LuZap size={15} /> Ad-free streaming</div>
+        <div className="premium-perk"><LuSparkles size={15} /> All providers</div>
+        <div className="premium-perk"><LuShieldCheck size={15} /> Priority support</div>
+      </div>
 
-          <div className="flex gap-2">
+      {/* Plan cards */}
+      <div className="premium-plans">
+        {packages.map((pkg, index) => {
+          const Icon = PLAN_ICONS[index % PLAN_ICONS.length];
+          const isSelected = selectedPkg?.id === pkg.id;
+          const isBestValue = pkg.price === cheapest && packages.length > 1;
+          return (
+            <FocusableButton
+              key={pkg.id}
+              focusKey={`PREMIUM_PLAN_${pkg.id}`}
+              className={`premium-plan ${isSelected ? 'selected' : ''} ${isBestValue ? 'best' : ''}`}
+              onClick={() => setSelectedPkg(pkg)}
+            >
+              {isBestValue && <span className="premium-plan-badge">Best value</span>}
+              <div className="premium-plan-head">
+                <span className="premium-plan-icon"><Icon size={18} /></span>
+                <div className="premium-plan-names">
+                  <h3 className="premium-plan-name">{pkg.name}</h3>
+                  <p className="premium-plan-duration">{pkg.duration_days} days</p>
+                </div>
+                <div className="premium-plan-price">
+                  <span className="premium-plan-amount">৳{pkg.price}</span>
+                  <span className="premium-plan-per">
+                    ৳{(pkg.price / pkg.duration_days).toFixed(1)}/day
+                  </span>
+                </div>
+              </div>
+              <div className="premium-plan-features">
+                {(pkg.features || '').split(',').map((f, i) => (
+                  <span key={i} className="premium-plan-feature">
+                    <LuCheck size={13} /> {f.trim()}
+                  </span>
+                ))}
+              </div>
+              <span className={`premium-plan-check ${isSelected ? 'on' : ''}`}>
+                {isSelected && <LuCheck size={13} />}
+              </span>
+            </FocusableButton>
+          );
+        })}
+      </div>
+
+      {/* Payment panel */}
+      {selectedPkg && (
+        <div className="premium-payment">
+          <h3 className="premium-payment-title">
+            Pay for <span>{selectedPkg.name}</span>
+          </h3>
+
+          <div className="premium-methods">
             {['bkash', 'nagad', 'rocket'].map(method => (
               <button
                 key={method}
                 onClick={() => setPaymentMethod(method)}
-                className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all ${
-                  paymentMethod === method
-                    ? 'bg-[var(--primary)] text-[var(--on-primary)]'
-                    : 'bg-[var(--surface-container-high)] text-[var(--on-surface-variant)]'
-                }`}
+                className={`premium-method ${paymentMethod === method ? 'active' : ''}`}
               >
                 {method.charAt(0).toUpperCase() + method.slice(1)}
               </button>
             ))}
           </div>
 
-          <div className="p-3 rounded-xl bg-[var(--surface-container-high)]">
-            <p className="text-xs text-[var(--on-surface-variant)]">Send ৳{selectedPkg.price} to:</p>
-            <p className="text-sm font-semibold text-[var(--on-surface)] mt-1">
-              {paymentMethod === 'bkash' ? paymentNumbers.bkash : paymentMethod === 'nagad' ? paymentNumbers.nagad : paymentNumbers.rocket}
+          <div className="premium-sendto">
+            <p className="premium-sendto-label">
+              Send <strong>৳{selectedPkg.price}</strong> to this number
+            </p>
+            <p className="premium-sendto-number">
+              {paymentMethod === 'bkash'
+                ? paymentNumbers.bkash
+                : paymentMethod === 'nagad'
+                  ? paymentNumbers.nagad
+                  : paymentNumbers.rocket}
             </p>
           </div>
 
@@ -152,20 +209,23 @@ export function PremiumPage() {
             type="text"
             value={transactionId}
             onChange={e => setTransactionId(e.target.value)}
-            placeholder="Transaction ID"
-            className="w-full px-4 py-3 rounded-xl bg-[var(--surface-container-high)] border border-[var(--outline-variant)] text-[var(--on-surface)] placeholder:text-[var(--on-surface-variant)] focus:outline-none focus:border-[var(--primary)] transition-colors"
+            placeholder="Transaction ID (e.g. 9F7A2K1B)"
+            className="premium-tx-input"
           />
 
-          {error && <div className="p-3 rounded-lg bg-red-500/10 text-red-400 text-sm">{error}</div>}
-          {msg && <div className="p-3 rounded-lg bg-green-500/10 text-green-400 text-sm">{msg}</div>}
+          {error && <div className="premium-alert error">{error}</div>}
+          {msg && <div className="premium-alert success">{msg}</div>}
 
           <button
             onClick={handleSubscribe}
             disabled={loading || !transactionId.trim()}
-            className="w-full py-3 rounded-xl bg-[var(--primary)] text-[var(--on-primary)] font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
+            className="premium-submit"
           >
-            {loading ? 'Submitting...' : 'Submit Request'}
+            {loading ? 'Submitting…' : 'Submit Request'}
           </button>
+          <p className="premium-note">
+            Requests are reviewed manually — activation usually takes a few minutes.
+          </p>
         </div>
       )}
     </div>

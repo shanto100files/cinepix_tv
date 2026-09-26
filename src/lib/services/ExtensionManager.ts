@@ -166,6 +166,8 @@ export class ExtensionManager {
         installed: false,
         hasSettings: item.hasSettings || false,
         show_on_home: item.show_on_home,
+        is_adult: Boolean(item.is_adult),
+        access_mode: item.access_mode || "all",
       }));
 
       // Cache the manifest

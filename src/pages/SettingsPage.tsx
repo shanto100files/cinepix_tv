@@ -16,6 +16,7 @@ import {
   LuDownload as Download,
   LuShieldCheck as Shield,
   LuZap as Zap,
+  LuEyeOff as EyeOff,
 } from "react-icons/lu";
 import { PlayerSettings } from "../components/settings/PlayerSettings";
 import { SubtitleSettings } from "../components/settings/SubtitleSettings";
@@ -52,6 +53,9 @@ export const SettingsPage: React.FC = () => {
   const [language, setLanguage] = React.useState(() =>
     settingsStorage.getString("preferred_language") || "en",
   );
+  const [adultEnabled, setAdultEnabled] = React.useState(() =>
+    settingsStorage.isAdultEnabled(),
+  );
   const user = useAuthStore((s) => s.user);
   const isPremium = useAuthStore((s) => s.isPremium);
   const logout = useAuthStore((s) => s.logout);
@@ -67,6 +71,11 @@ export const SettingsPage: React.FC = () => {
   const handleLanguageChange = (code: string) => {
     setLanguage(code);
     settingsStorage.setString("preferred_language", code);
+  };
+
+  const handleAdultToggle = (enabled: boolean) => {
+    setAdultEnabled(enabled);
+    settingsStorage.setAdultEnabled(enabled);
   };
 
   return (
@@ -241,6 +250,44 @@ export const SettingsPage: React.FC = () => {
                 </div>
               </>
             )}
+          </div>
+        </section>
+
+        {/* 18+ Content Group */}
+        <section className="settings-group">
+          <h2
+            className="title-md flex items-center gap-2"
+            style={{ marginBottom: "8px" }}
+          >
+            <EyeOff size={20} /> 18+ Content
+          </h2>
+          <div className="settings-card">
+            <div className="settings-row">
+              <div className="settings-info">
+                <h3 className="label-lg">Enable 18+ Content</h3>
+                <p className="body-md text-muted">
+                  Show 18+ providers and adult sections. Erotic content is
+                  blurred until you click to reveal it. You must confirm you
+                  are 18 or older.
+                </p>
+              </div>
+              <FocusableButton
+                className={`theme-toggle-btn ${adultEnabled ? "active" : ""}`}
+                onClick={() => {
+                  if (adultEnabled) {
+                    handleAdultToggle(false);
+                  } else {
+                    const ok = window.confirm(
+                      "You must be 18 or older to enable 18+ content. Enable it?",
+                    );
+                    if (ok) handleAdultToggle(true);
+                  }
+                }}
+                style={{ padding: "6px 12px" }}
+              >
+                {adultEnabled ? "Enabled" : "Disabled"}
+              </FocusableButton>
+            </div>
           </div>
         </section>
 

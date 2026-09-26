@@ -60,7 +60,9 @@ export const Hero: React.FC<HeroProps> = ({ post }) => {
       const params = new URLSearchParams();
       if (postProvider) params.set("provider", postProvider);
       if (post.image) params.set("poster", post.image);
-      navigate(`/content/${encodeURIComponent(post.link)}?${params.toString()}`);
+      navigate(`/content/${encodeURIComponent(post.link)}?${params.toString()}`, {
+        state: { from: "/" },
+      });
     }
   };
 

@@ -171,6 +171,39 @@
     color-mix(in srgb, var(--surface-container-lowest) 38%, transparent);
 }
 
+.post-adult-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(8, 8, 12, 0.35);
+  cursor: pointer;
+}
+
+.post-adult-badge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.45);
+}
+
+.post-adult-hint {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(0, 0, 0, 0.5);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
 .post-corner-tag {
   position: absolute;
   top: 8px;

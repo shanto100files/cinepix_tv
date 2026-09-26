@@ -92,7 +92,12 @@ export const SearchPage: React.FC = () => {
   const { mergedPosts, emptyResults, loading, isAllLoaded } =
     useGlobalSearch(query);
 
-  const [hideNSFW, setHideNSFW] = useState(true);
+  // 18+ filter persists across sessions via the settings age gate.
+  const [hideNSFW, setHideNSFW] = useState(() => !settingsStorage.isAdultEnabled());
+  const toggleNSFW = (next: boolean) => {
+    setHideNSFW(next);
+    settingsStorage.setAdultEnabled(!next);
+  };
 
   const NSFW_KEYWORDS = /\b(porn|xxx|sex|nude|naked|erotic|adult|18\+|uncensored|hentai|leaked|mms|scandal|bf|gf|hot|sexy|desi\s*mms|dirty|lust|seduce|stepmom|stepsis|massage|creampie|blowjob|handjob|gangbang|threesome|milf|camgirl|onlyfans|playboy|penthouse)\b/i;
 
@@ -312,9 +317,9 @@ export const SearchPage: React.FC = () => {
             <input
               type="checkbox"
               checked={hideNSFW}
-              onChange={(e) => setHideNSFW(e.target.checked)}
+              onChange={(e) => toggleNSFW(e.target.checked)}
             />
-            <span>18+ off</span>
+            <span>{hideNSFW ? "18+ off" : "18+ on"}</span>
           </label>
         </div>
       )}
@@ -343,6 +348,7 @@ export const SearchPage: React.FC = () => {
                 if (post.image) params.append("poster", post.image);
                 navigate(
                   `/content/${encodeURIComponent(post.link)}?${params.toString()}`,
+                  { state: { from: `/search?q=${encodeURIComponent(query || "")}` } },
                 );
               }}
             />

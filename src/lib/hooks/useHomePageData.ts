@@ -6,6 +6,8 @@ import {cacheStorage} from '../storage';
 import useContentStore from '../zustand/contentStore';
 import axios from 'axios';
 import useAuthStore from '../zustand/authStore';
+import {settingsStorage} from '../storage/SettingsStorage';
+import {isAdultTitle} from '../utils/adultGate';
 
 async function syncToServer(providerValue: string, sections: HomePageData[]) {
   try {
@@ -58,15 +60,20 @@ export const useHomePageData = ({
 
   const providersToFetch = React.useMemo(() => {
     if (!installedProviders || installedProviders.length === 0) return [provider];
+    const adultAllowed = settingsStorage.isAdultEnabled();
+    const visibleProviders = adultAllowed
+      ? installedProviders
+      : installedProviders.filter((p: any) => !p.is_adult);
+    if (visibleProviders.length === 0) return [provider];
     if (homeProviderValue) {
       const vals = homeProviderValue.split(',').filter(Boolean);
       if (vals.length > 0) {
-        const matched = installedProviders.filter((p: any) => vals.includes(p.value));
+        const matched = visibleProviders.filter((p: any) => vals.includes(p.value));
         if (matched.length > 0) return matched;
       }
     }
-    const homeProviders = installedProviders.filter((p: any) => p.show_on_home !== false);
-    if (homeProviders.length === 0) return installedProviders;
+    const homeProviders = visibleProviders.filter((p: any) => p.show_on_home !== false);
+    if (homeProviders.length === 0) return visibleProviders;
     if (allowedProviders === null) return homeProviders;
     const filtered = homeProviders.filter(p => allowedProviders.includes(p.value));
     return filtered.length > 0 ? filtered : homeProviders;
@@ -104,11 +111,23 @@ export const useHomePageData = ({
         syncToServer(providersToFetch[0]?.value || provider.value, allData).catch(() => {});
       }
 
+      // 18+ sections (erotic rows etc.) are blurred card-side; when the age
+      // gate is off they are dropped entirely so they never reach the UI.
+      if (!settingsStorage.isAdultEnabled()) {
+        return allData.filter(section => !isAdultTitle(section.title));
+      }
+
       return allData;
     },
     enabled: enabled && providersToFetch.length > 0 && providersToFetch.some(p => p.value),
-    staleTime: 60 * 1000,
-    gcTime: 60 * 60 * 1000,
+    // Home feels instant: cached data renders immediately on every visit, and
+    // a silent background refresh only brings NEW posts in (stale-while-
+    // revalidate). Only retry/error paths refetch eagerly.
+    staleTime: 30 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
     retry: (failureCount, error) => {
       if (error.name === 'AbortError') {
         return false;
@@ -128,9 +147,6 @@ export const useHomePageData = ({
       return undefined;
     },
     initialDataUpdatedAt: 0,
-    refetchOnMount: 'always',
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: 'always',
   });
 
   useEffect(() => {
@@ -138,6 +154,21 @@ export const useHomePageData = ({
       cacheStorage.setString('homeDataAggregate', JSON.stringify(query.data));
     }
   }, [query.data]);
+
+  // One silent background refresh per app session so new posts show up
+  // without blocking the cached UI (stale-while-revalidate).
+  const bgRefreshedRef = React.useRef(false);
+  React.useEffect(() => {
+    if (bgRefreshedRef.current) return;
+    if (!enabled) return;
+    if (!query.data || query.data.length === 0) return;
+    bgRefreshedRef.current = true;
+    const t = setTimeout(() => {
+      query.refetch().catch(() => {});
+    }, 1500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, query.data === undefined]);
 
   return query;
 };

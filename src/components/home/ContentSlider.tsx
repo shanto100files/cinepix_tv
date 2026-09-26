@@ -66,7 +66,7 @@ export const ContentSlider: React.FC<ContentSliderProps> = ({
     if (queryString) {
       url += `?${queryString}`;
     }
-    navigate(url);
+    navigate(url, { state: { from: "/" } });
   };
 
   if (isLoading) {

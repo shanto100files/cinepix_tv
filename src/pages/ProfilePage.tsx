@@ -1,5 +1,8 @@
 import { useNavigate } from 'react-router-dom';
+import { LuCrown, LuLogOut, LuLogIn, LuChevronRight, LuBadgeCheck } from 'react-icons/lu';
 import useAuthStore from '../lib/zustand/authStore';
+import { FocusableButton } from '../components/layout/FocusableButton';
+import './ProfilePage.css';
 
 export function ProfilePage() {
   const user = useAuthStore(s => s.user);
@@ -12,72 +15,94 @@ export function ProfilePage() {
     navigate('/login');
   };
 
-  return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-[var(--on-surface)] mb-6">Profile</h1>
+  const initial = user?.username?.[0]?.toUpperCase() || '?';
+  const expiry = user?.premium_expires_at
+    ? new Date(user.premium_expires_at).toLocaleDateString(undefined, {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
+    : null;
 
-      <div className="rounded-2xl bg-[var(--surface-container)] border border-[var(--outline-variant)] p-6 space-y-4">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-[var(--primary-container)] flex items-center justify-center text-2xl font-bold text-[var(--on-primary-container)]">
-            {user?.username?.[0]?.toUpperCase() || '?'}
+  return (
+    <div className="profile-page">
+      <h1 className="headline-lg profile-page-title">Profile</h1>
+
+      {/* Hero identity card */}
+      <div className={`profile-hero ${isPremium ? 'profile-hero-premium' : ''}`}>
+        <div className="profile-hero-glow" aria-hidden="true" />
+        <div className="profile-hero-inner">
+          <div className="profile-avatar">
+            {initial}
+            {isPremium && <span className="profile-avatar-crown"><LuCrown size={13} /></span>}
           </div>
-          <div>
-            <h2 className="text-lg font-semibold text-[var(--on-surface)]">{user?.username || 'Guest'}</h2>
-            <p className="text-sm text-[var(--on-surface-variant)]">{user?.email || 'Not signed in'}</p>
+          <div className="profile-hero-copy">
+            <h2 className="profile-name">
+              {user?.username || 'Guest'}
+              {isPremium && <LuBadgeCheck size={17} className="profile-verified" />}
+            </h2>
+            <p className="profile-email">{user?.email || 'Not signed in'}</p>
+            {isPremium && expiry && (
+              <p className="profile-premium-until">Premium until {expiry}</p>
+            )}
+          </div>
+          <div className={`profile-plan-chip ${isPremium ? 'premium' : ''}`}>
+            {isPremium ? 'PREMIUM' : 'FREE'}
           </div>
         </div>
+      </div>
 
-        <div className="border-t border-[var(--outline-variant)] pt-4">
-          <div className="flex items-center justify-between">
-            <span className="text-[var(--on-surface-variant)]">Premium Status</span>
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${isPremium ? 'bg-green-500/20 text-green-400' : 'bg-[var(--surface-container-high)] text-[var(--on-surface-variant)]'}`}>
-              {isPremium ? 'Active' : 'Free'}
+      {/* Account details */}
+      {user && (
+        <div className="profile-card">
+          <div className="profile-detail-row">
+            <span className="profile-detail-label">User ID</span>
+            <span className="profile-detail-value">#{user.id}</span>
+          </div>
+          <div className="profile-detail-row">
+            <span className="profile-detail-label">Account Type</span>
+            <span className="profile-detail-value">{user.is_admin ? 'Admin' : 'User'}</span>
+          </div>
+          <div className="profile-detail-row">
+            <span className="profile-detail-label">Premium Status</span>
+            <span className={`profile-plan-pill ${isPremium ? 'premium' : ''}`}>
+              {isPremium ? 'Active' : 'Free plan'}
             </span>
           </div>
-          {user?.premium_expires_at && (
-            <p className="text-xs text-[var(--on-surface-variant)] mt-1">Expires: {new Date(user.premium_expires_at).toLocaleDateString()}</p>
-          )}
         </div>
+      )}
 
-        {user && (
-          <div className="border-t border-[var(--outline-variant)] pt-4 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-[var(--on-surface-variant)]">User ID</span>
-              <span className="text-[var(--on-surface)]">{user.id}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-[var(--on-surface-variant)]">Account Type</span>
-              <span className="text-[var(--on-surface)]">{user.is_admin ? 'Admin' : 'User'}</span>
-            </div>
+      {/* Actions */}
+      <div className="profile-actions">
+        {!isPremium && (
+          <FocusableButton
+            className="profile-cta-premium"
+            onClick={() => navigate('/premium')}
+          >
+            <LuCrown size={18} />
+            <span>Upgrade to Premium</span>
+            <span className="profile-cta-sub">Ad-free · All providers · 4K</span>
+          </FocusableButton>
+        )}
+        {user ? (
+          <FocusableButton className="profile-cta-ghost" onClick={handleLogout}>
+            <LuLogOut size={16} />
+            <span>Sign Out</span>
+          </FocusableButton>
+        ) : (
+          <FocusableButton
+            className="profile-cta-premium"
+            onClick={() => navigate('/login')}
+          >
+            <LuLogIn size={18} />
+            <span>Sign In</span>
+          </FocusableButton>
+        )}
+        {isPremium && (
+          <div className="profile-manage-hint">
+            Manage plan <LuChevronRight size={14} />
           </div>
         )}
-
-        <div className="border-t border-[var(--outline-variant)] pt-4 space-y-2">
-          {!isPremium && (
-            <button
-              onClick={() => navigate('/premium')}
-              className="w-full py-3 rounded-xl bg-[var(--primary)] text-[var(--on-primary)] font-semibold hover:opacity-90 transition-opacity"
-            >
-              Upgrade to Premium
-            </button>
-          )}
-          {user && (
-            <button
-              onClick={handleLogout}
-              className="w-full py-3 rounded-xl bg-red-500/10 text-red-400 font-semibold hover:bg-red-500/20 transition-colors"
-            >
-              Sign Out
-            </button>
-          )}
-          {!user && (
-            <button
-              onClick={() => navigate('/login')}
-              className="w-full py-3 rounded-xl bg-[var(--primary)] text-[var(--on-primary)] font-semibold hover:opacity-90 transition-opacity"
-            >
-              Sign In
-            </button>
-          )}
-        </div>
       </div>
     </div>
   );

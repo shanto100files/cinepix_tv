@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { FocusContext, useFocusable } from "@noriginmedia/norigin-spatial-navigation-react";
 import { resume } from "@noriginmedia/norigin-spatial-navigation-core";
 import { LuArrowDownNarrowWide, LuArrowDownWideNarrow, LuArrowLeft, LuCircleAlert, LuRefreshCw, LuSearch, LuX } from "react-icons/lu";
@@ -133,6 +134,7 @@ export const MetaPage: React.FC = () => {
   const { url } = useParams<{ url: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { provider, installedProviders } = useContentStore();
   const { addDownload, downloads, cancelDownload } = useDownloadStore();
   const { watchList, addItem, removeItem } = useWatchListStore();
@@ -153,6 +155,20 @@ export const MetaPage: React.FC = () => {
 
   const link = decodeURIComponent(url || "");
   const activeProviderValue = searchParams.get("provider") || provider?.value || "";
+
+  // Ad iframes push hidden entries into the webview history; a plain
+  // navigate(-1) then needs several presses to actually leave the page.
+  // If this detail page was opened with navigation state (the normal case)
+  // we know where the user came from, so back = replace onto that origin
+  // entry, skipping any ad-polluted entries in between.
+  const goBackSmart = () => {
+    const from = (location.state as {from?: string} | null)?.from;
+    if (from) {
+      navigate(from, { replace: true });
+      return;
+    }
+    navigate(-1);
+  };
   const episodeSortOrderKey = `${EPISODE_SORT_ORDER_KEY_PREFIX}:${activeProviderValue}:${link}`;
   const { info, meta, isLoading, error, refetch } = useContentDetails(link, activeProviderValue);
   const [activeSeason, setActiveSeason] = useState<Link | null>(null);
@@ -294,7 +310,7 @@ export const MetaPage: React.FC = () => {
         <h1>Could not load details</h1>
         <p>{error instanceof Error ? error.message : "Content was not found."}</p>
         <div className="content-state-actions">
-          <FocusableButton className="content-secondary-button" onClick={() => navigate(-1)}><LuArrowLeft size={18} /> Go back</FocusableButton>
+          <FocusableButton className="content-secondary-button" onClick={goBackSmart}><LuArrowLeft size={18} /> Go back</FocusableButton>
           <FocusableButton className="content-primary-button" onClick={() => void refetch()}><LuRefreshCw size={18} /> Retry</FocusableButton>
         </div>
       </main>
@@ -534,11 +550,11 @@ export const MetaPage: React.FC = () => {
           rating={meta?.imdbRating || info.rating}
           genres={meta?.genre}
           tags={info.tags}
-          onBack={() => navigate(-1)}
+          onBack={goBackSmart}
         />
 
         <div className="content-detail-inner">
-          <AdBox url={topAdUrl} height={80} />
+          <AdBox url={topAdUrl} height={120} />
           <ContentOverview
             description={description}
             providerName={providerName}

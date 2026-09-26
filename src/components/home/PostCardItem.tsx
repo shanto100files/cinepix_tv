@@ -3,6 +3,7 @@ import { LuX as X } from "react-icons/lu";
 import { useFocusable } from "@noriginmedia/norigin-spatial-navigation-react";
 import { settingsStorage } from "../../lib/storage";
 import { cn } from "../../lib/utils";
+import { isAdultTitle } from "../../lib/utils/adultGate";
 import {
   prefetchArtworkPalette,
   useArtworkPalette,
@@ -66,6 +67,10 @@ export const PostCardItem: React.FC<PostCardItemProps> = ({
   const tvMode = settingsStorage.isTvModeEnabled() || isAndroid;
   const [imageFailed, setImageFailed] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [unblurred, setUnblurred] = useState(false);
+
+  // 18+/erotic items are blurred until the user explicitly clicks them.
+  const isAdultCard = isAdultTitle(post.title);
 
   useEffect(() => {
     setImageFailed(false);
@@ -161,6 +166,11 @@ export const PostCardItem: React.FC<PostCardItemProps> = ({
       onPointerEnter={prepareTheme}
       onClick={() => {
         prepareTheme();
+        if (isAdultCard && !unblurred && !settingsStorage.isAdultEnabled()) {
+          // First click just reveals the blurred 18+ card.
+          setUnblurred(true);
+          return;
+        }
         onClick(post);
       }}
       onKeyDown={(e) => {
@@ -221,6 +231,11 @@ export const PostCardItem: React.FC<PostCardItemProps> = ({
             src={post.image}
             alt=""
             className={`post-image${imageLoaded ? " loaded" : ""}`}
+            style={
+              isAdultCard && !unblurred && !settingsStorage.isAdultEnabled()
+                ? { filter: "blur(14px) saturate(0.6)", transform: "scale(1.1)" }
+                : undefined
+            }
             loading="lazy"
             decoding="async"
             referrerPolicy="no-referrer"
@@ -236,6 +251,19 @@ export const PostCardItem: React.FC<PostCardItemProps> = ({
               {(post.title || "C").trim().charAt(0).toUpperCase()}
             </span>
           </div>
+        )}
+        {isAdultCard && !unblurred && !settingsStorage.isAdultEnabled() && (
+          <span
+            className="post-adult-overlay"
+            aria-hidden="true"
+            onClick={(e) => {
+              e.stopPropagation();
+              setUnblurred(true);
+            }}
+          >
+            <span className="post-adult-badge">18+</span>
+            <span className="post-adult-hint">Click to reveal</span>
+          </span>
         )}
         {onRemove && (
           <button

@@ -196,3 +196,8 @@ a {
   transform: none;
   box-shadow: none;
 }
+
+.ad-box-container.tv-focus {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}

@@ -24,6 +24,7 @@ export const WatchlistPage: React.FC = () => {
     const query = params.toString();
     navigate(
       `/watchlist/content/${encodeURIComponent(post.link)}${query ? `?${query}` : ""}`,
+      { state: { from: "/watchlist" } },
     );
   };
 

@@ -3,6 +3,7 @@ import { LuBlocks as Blocks, LuChevronDown as ChevronDown, LuCheck as Check } fr
 import useContentStore from '../../lib/zustand/contentStore';
 import useAuthStore from '../../lib/zustand/authStore';
 import { FocusableButton } from './FocusableButton';
+import { settingsStorage } from '../../lib/storage';
 import './ProviderSwitcher.css';
 
 export const ProviderSwitcher: React.FC = () => {
@@ -10,6 +11,12 @@ export const ProviderSwitcher: React.FC = () => {
   const isAdmin = useAuthStore((s) => s.user?.is_admin);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // 18+ providers stay out of the switcher unless the age gate is on.
+  const adultAllowed = settingsStorage.isAdultEnabled();
+  const visibleProviders = (installedProviders || []).filter(
+    (p) => adultAllowed || !p.is_adult,
+  );
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -21,7 +28,7 @@ export const ProviderSwitcher: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  if (!isAdmin || !installedProviders || installedProviders.length === 0) {
+  if (!isAdmin || !visibleProviders || visibleProviders.length === 0) {
     return null;
   }
 
@@ -45,7 +52,7 @@ export const ProviderSwitcher: React.FC = () => {
 
       {isOpen && (
         <div className="provider-dropdown glass-overlay">
-          {installedProviders.map(provider => (
+          {visibleProviders.map(provider => (
             <FocusableButton
               key={`${provider.source?.author}:${provider.value}`}
               className={`provider-option ${activeProvider?.value === provider.value ? 'active' : ''}`}

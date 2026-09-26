@@ -180,7 +180,7 @@ export const CatalogPage: React.FC = () => {
       if (p.image) params.append("poster", p.image);
       const queryString = params.toString();
       if (queryString) url += `?${queryString}`;
-      navigate(url);
+      navigate(url, { state: { from: "/catalog" } });
     },
     [catalogKey, navigate, providerValue, scrollElement],
   );
