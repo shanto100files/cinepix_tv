@@ -78,7 +78,7 @@ export default function App() {
   initDownloadListeners();
   useAppUpdater();
 
-  const { primary } = useThemeStore();
+  const { primary, background } = useThemeStore();
   const tvMode = settingsStorage.isTvModeEnabled();
 
   const [appReady, setAppReady] = useState(false);
@@ -215,8 +215,8 @@ export default function App() {
 
   useEffect(() => {
     updateProvidersService.startAutomaticUpdateCheck();
-    applyThemeTokens(primary);
-  }, [primary]);
+    applyThemeTokens(primary, background);
+  }, [primary, background]);
 
   if (appShutdown) {
     return (

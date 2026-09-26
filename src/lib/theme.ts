@@ -52,12 +52,15 @@ function contrastText(color: Rgb): string {
   return luminance > 0.42 ? "#171217" : "#ffffff";
 }
 
-export function applyThemeTokens(accent: string): void {
+export function applyThemeTokens(accent: string, background = "oled"): void {
   const root = document.documentElement;
   const primary = parseHex(accent);
   const container = mix(primary, { r: 0, g: 0, b: 0 }, 0.64);
 
-  root.setAttribute("data-theme", "oled");
+  root.setAttribute(
+    "data-theme",
+    background === "gray" || background === "white" ? background : "oled",
+  );
   root.style.setProperty("--primary", toHex(primary));
   root.style.setProperty(
     "--primary-rgb",

@@ -6,6 +6,7 @@ import { mainStorage } from "./StorageService";
 export enum SettingsKeys {
   // UI preferences
   PRIMARY_COLOR = "primaryColor",
+  BACKGROUND_THEME = "backgroundTheme",
   IS_CUSTOM_THEME = "isCustomTheme",
   SHOW_TAB_BAR_LABELS = "showTabBarLabels",
   CUSTOM_COLOR = "customColor",
@@ -68,6 +69,22 @@ export class SettingsStorage {
 
   setPrimaryColor(color: string): void {
     mainStorage.setString(SettingsKeys.PRIMARY_COLOR, color);
+  }
+
+  /**
+   * Background theme: "gray" | "oled" | "white".
+   * OLED is the default for both desktop and TV.
+   */
+  getBackgroundTheme(): string {
+    const theme = mainStorage.getString(SettingsKeys.BACKGROUND_THEME);
+    return theme === "gray" || theme === "white" ? theme : "oled";
+  }
+
+  setBackgroundTheme(theme: string): void {
+    mainStorage.setString(
+      SettingsKeys.BACKGROUND_THEME,
+      theme === "gray" || theme === "white" ? theme : "oled",
+    );
   }
 
   isCustomTheme(): boolean {

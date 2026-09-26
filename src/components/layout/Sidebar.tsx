@@ -156,7 +156,12 @@ export const Sidebar: React.FC = () => {
         </nav>
 
         {user && (
-          <div className="sidebar-user" onClick={() => navigate("/profile")}>
+          <FocusableButton
+            className="sidebar-user"
+            onClick={() => navigate("/profile")}
+            title="Open profile"
+            aria-label="Open profile"
+          >
             <div className="sidebar-user-avatar">
               {user.username?.[0]?.toUpperCase() || <UserIcon size={16} />}
             </div>
@@ -168,7 +173,7 @@ export const Sidebar: React.FC = () => {
                 </span>
               </div>
             )}
-          </div>
+          </FocusableButton>
         )}
       </aside>
     </FocusContext.Provider>

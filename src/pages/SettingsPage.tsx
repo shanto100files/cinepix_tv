@@ -37,8 +37,14 @@ const LANGUAGES = [
   { code: "ar", label: "العربية (Arabic)" },
 ];
 
+const BACKGROUND_THEMES: { value: "gray" | "oled" | "white"; label: string }[] = [
+  { value: "gray", label: "Gray" },
+  { value: "oled", label: "OLED" },
+  { value: "white", label: "White" },
+];
+
 export const SettingsPage: React.FC = () => {
-  const { primary, setPrimary } = useThemeStore();
+  const { primary, setPrimary, background, setBackground } = useThemeStore();
   const [appVersion, setAppVersion] = React.useState("Loading...");
   const [infoPageDynamicTheme, setInfoPageDynamicTheme] = React.useState(() =>
     settingsStorage.isInfoPageDynamicThemeEnabled(),
@@ -279,6 +285,32 @@ export const SettingsPage: React.FC = () => {
             <Monitor size={20} /> Appearance
           </h2>
           <div className="settings-card">
+            {/* Background Theme */}
+            <div className="settings-row">
+              <div className="settings-info">
+                <h3 className="label-lg">Background Theme</h3>
+                <p className="body-md text-muted">
+                  OLED saves power on TV screens, White suits bright rooms
+                </p>
+              </div>
+              <div className="flex gap-1 flex-wrap justify-end">
+                {BACKGROUND_THEMES.map((t) => (
+                  <FocusableButton
+                    key={t.value}
+                    className={`theme-toggle-btn ${background === t.value ? "active" : ""}`}
+                    onClick={() => setBackground(t.value)}
+                    style={{ padding: "6px 10px", fontSize: "12px" }}
+                    aria-label={`Set background theme to ${t.label}`}
+                    aria-pressed={background === t.value}
+                  >
+                    {t.label}
+                  </FocusableButton>
+                ))}
+              </div>
+            </div>
+
+            <div className="settings-divider" />
+
             {/* Accent Color */}
             <div className="settings-row">
               <div className="settings-info">

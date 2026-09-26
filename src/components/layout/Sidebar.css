@@ -398,8 +398,14 @@
   transition: background-color 160ms ease;
 }
 
-.sidebar-user:hover {
+.sidebar-user:hover,
+.sidebar-user.tv-focus {
   background: var(--surface-container-high);
+}
+
+.sidebar-user.tv-focus {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
 }
 
 .sidebar-user-avatar {
