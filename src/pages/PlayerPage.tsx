@@ -272,7 +272,7 @@ export const PlayerPage: React.FC = () => {
   useEffect(() => {
     let mounted = true;
     syncFromSharedFolder()
-      .catch((error) => console.warn("[VegaSync] Player sync failed:", error))
+      .catch((error) => console.warn("[CinepixSync] Player sync failed:", error))
       .finally(() => {
         if (mounted) setSyncReady(true);
       });
@@ -501,7 +501,7 @@ const TvPlayer: React.FC<any> = ({
           const { openUrl } = await import("@tauri-apps/plugin-opener");
           const headers = stream.headers ? JSON.stringify(stream.headers) : "";
           const external = useExternalPlayer ? "&external=1" : "";
-          const intentUrl = `vega://play?url=${encodeURIComponent(playUrl)}&headers=${encodeURIComponent(headers)}${external}`;
+          const intentUrl = `cinepix://play?url=${encodeURIComponent(playUrl)}&headers=${encodeURIComponent(headers)}${external}`;
           await openUrl(intentUrl);
         } else if (isLinux || useVlc) {
           const { invoke } = await import("@tauri-apps/api/core");

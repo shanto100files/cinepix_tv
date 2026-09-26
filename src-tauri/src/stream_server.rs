@@ -458,7 +458,7 @@ mod local_file_tests {
     #[tokio::test]
     async fn streams_registered_local_file_ranges() {
         let path = std::env::temp_dir().join(format!(
-            "vega-local-stream-{}-{}.mkv",
+            "cinepix-local-stream-{}-{}.mkv",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)

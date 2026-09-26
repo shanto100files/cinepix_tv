@@ -295,7 +295,9 @@ export class SettingsStorage {
   }
 
   getDownloadLocation(): string {
-    return mainStorage.getString(SettingsKeys.DOWNLOAD_LOCATION) || "vega";
+    const value = mainStorage.getString(SettingsKeys.DOWNLOAD_LOCATION);
+    // Older builds stored the upstream default sentinel "vega"; normalize it.
+    return !value || value === "vega" ? "cinepix" : value;
   }
 
   setDownloadLocation(location: string): void {
@@ -303,7 +305,7 @@ export class SettingsStorage {
   }
 
   resetDownloadLocation(): void {
-    mainStorage.setString(SettingsKeys.DOWNLOAD_LOCATION, "vega");
+    mainStorage.setString(SettingsKeys.DOWNLOAD_LOCATION, "cinepix");
   }
 
   getDownloadConcurrency(): number {

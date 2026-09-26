@@ -150,16 +150,16 @@ export default function App() {
 
   useEffect(() => {
     initializeSyncService().catch((error) =>
-      console.warn("[VegaSync] Startup sync failed:", error),
+      console.warn("[CinepixSync] Startup sync failed:", error),
     );
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         syncFromSharedFolder().catch((error) =>
-          console.warn("[VegaSync] Foreground sync failed:", error),
+          console.warn("[CinepixSync] Foreground sync failed:", error),
         );
       } else {
         publishSyncManifest().catch((error) =>
-          console.warn("[VegaSync] Background publish failed:", error),
+          console.warn("[CinepixSync] Background publish failed:", error),
         );
       }
     };
@@ -167,7 +167,7 @@ export default function App() {
     const interval = window.setInterval(() => {
       if (document.visibilityState === "visible") {
         syncFromSharedFolder().catch((error) =>
-          console.warn("[VegaSync] Periodic sync failed:", error),
+          console.warn("[CinepixSync] Periodic sync failed:", error),
         );
       }
     }, 30000);

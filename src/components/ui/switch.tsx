@@ -43,7 +43,7 @@ const Switch = React.forwardRef<
         disabled={disabled}
         tabIndex={tvMode ? -1 : props.tabIndex}
         className={cn(
-          "vega-switch peer relative inline-flex h-8 w-[52px] shrink-0 cursor-pointer items-center rounded-full border-2 border-outline bg-surface-container-highest transition-[background-color,border-color] duration-200 outline-none hover:border-on-surface-variant data-[state=checked]:border-primary data-[state=checked]:bg-primary disabled:cursor-not-allowed disabled:opacity-45",
+          "cinepix-switch peer relative inline-flex h-8 w-[52px] shrink-0 cursor-pointer items-center rounded-full border-2 border-outline bg-surface-container-highest transition-[background-color,border-color] duration-200 outline-none hover:border-on-surface-variant data-[state=checked]:border-primary data-[state=checked]:bg-primary disabled:cursor-not-allowed disabled:opacity-45",
           focused && "tv-focus",
           className,
         )}

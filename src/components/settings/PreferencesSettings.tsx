@@ -17,7 +17,7 @@ import { clearAppCache } from "../../lib/clearAppCache";
 const QUALITIES = ["360p", "480p", "720p", "1080p", "4k"];
 
 export const PreferencesSettings: React.FC = () => {
-  const [downloadLocation, setDownloadLocation] = useState<string>("vega");
+  const [downloadLocation, setDownloadLocation] = useState<string>("cinepix");
   const [excludedQualities, setExcludedQualities] = useState<string[]>([]);
   const [autoInstallUpdates, setAutoInstallUpdates] = useState<boolean>(true);
   const [autoCheckUpdates, setAutoCheckUpdates] = useState<boolean>(true);
@@ -56,7 +56,7 @@ export const PreferencesSettings: React.FC = () => {
         setDownloadLocation(selected);
         settingsStorage.setDownloadLocation(selected);
         syncFromSharedFolder().catch((err) =>
-          console.warn("[VegaSync] Folder change sync failed:", err),
+          console.warn("[CinepixSync] Folder change sync failed:", err),
         );
       }
     } catch (err) {
@@ -64,11 +64,9 @@ export const PreferencesSettings: React.FC = () => {
     }
   };
 
-  const handleResetDir = () => {
-    setDownloadLocation("vega");
+  const handleResetDir = () => {          setDownloadLocation("cinepix");
     settingsStorage.resetDownloadLocation();
-    syncFromSharedFolder().catch((err) =>
-      console.warn("[VegaSync] Folder reset sync failed:", err),
+    syncFromSharedFolder().catch((err) =>          console.warn("[CinepixSync] Folder reset sync failed:", err),
     );
   };
 
@@ -159,7 +157,7 @@ export const PreferencesSettings: React.FC = () => {
           <p className="body-md text-muted" style={{ wordBreak: "break-all" }}>
             {isAndroid
               ? "Internal App Storage (Recommended for Android)"
-              : downloadLocation === "vega"
+              : downloadLocation === "cinepix"
                 ? "Default (Documents/CinepixDownloads)"
                 : downloadLocation}
           </p>
@@ -173,7 +171,7 @@ export const PreferencesSettings: React.FC = () => {
             >
               <FolderOpen size={16} /> Change
             </FocusableButton>
-            {downloadLocation !== "vega" && (
+            {downloadLocation !== "cinepix" && (
               <FocusableButton
                 className="theme-toggle-btn"
                 onClick={handleResetDir}

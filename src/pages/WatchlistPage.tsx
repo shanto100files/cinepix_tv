@@ -13,7 +13,7 @@ export const WatchlistPage: React.FC = () => {
 
   useEffect(() => {
     syncFromSharedFolder().catch((err) =>
-      console.warn("[VegaSync] Watchlist page sync failed:", err),
+      console.warn("[CinepixSync] Watchlist page sync failed:", err),
     );
   }, []);
 

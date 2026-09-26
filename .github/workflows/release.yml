@@ -84,8 +84,8 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         with:
           tagName: app-v__VERSION__
-          releaseName: "Vega v__VERSION__"
-          releaseBody: "Automated release of Vega."
+          releaseName: "Cinepix v__VERSION__"
+          releaseBody: "Automated release of Cinepix."
           releaseDraft: true
           includeUpdaterJson: ${{ secrets.TAURI_PRIVATE_KEY != '' }}
           args: ${{ matrix.platform == 'macos-latest' && '--target universal-apple-darwin' || matrix.platform == 'windows-latest' && '--bundles nsis' || '' }}
@@ -243,7 +243,7 @@ jobs:
           if [ -z "$KEYSTORE_BASE64" ]; then
             echo "No keystore secret found, skipping signing"
             UNSIGNED_APK=$(find src-tauri/gen/android/app/build/outputs/apk -name "*-unsigned.apk" | xargs ls -S | head -n 1)
-            cp "$UNSIGNED_APK" vega-tv-android.apk
+            cp "$UNSIGNED_APK" cinepix-tv-android.apk
             exit 0
           fi
 
@@ -260,7 +260,7 @@ jobs:
           $BUILD_TOOLS/zipalign -v -p 4 "$UNSIGNED_APK" app-aligned.apk
 
           # 5. Sign it
-          $BUILD_TOOLS/apksigner sign --ks release.jks --ks-key-alias "$KEY_ALIAS" --ks-pass pass:"$KEYSTORE_PASSWORD" --key-pass pass:"$KEY_PASSWORD" --out vega-tv-android.apk app-aligned.apk
+          $BUILD_TOOLS/apksigner sign --ks release.jks --ks-key-alias "$KEY_ALIAS" --ks-pass pass:"$KEYSTORE_PASSWORD" --key-pass pass:"$KEY_PASSWORD" --out cinepix-tv-android.apk app-aligned.apk
 
       - name: Get version
         id: version
@@ -271,5 +271,5 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="app-v${{ steps.version.outputs.app_version }}"
-          gh release create "$TAG" vega-tv-android.apk --title "$TAG" --draft=true || true
-          gh release upload "$TAG" vega-tv-android.apk --clobber
+          gh release create "$TAG" cinepix-tv-android.apk --title "$TAG" --draft=true || true
+          gh release upload "$TAG" cinepix-tv-android.apk --clobber

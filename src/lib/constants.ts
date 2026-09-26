@@ -6,12 +6,12 @@ export const FLAGS = {
   ITALY: 'https://utfs.io/f/ImOWJajUmXfynpGlTaXrTMAELcs2W76PyY4IRJVBXCHOofa5',
 };
 
-export const defaultDownloadFolder = 'vega'; // Will be resolved via Tauri FS
+export const defaultDownloadFolder = 'cinepix'; // Will be resolved via Tauri FS
 export const downloadFolder = defaultDownloadFolder;
 
 export const themes: { name: string; color: string }[] = [
   {
-    name: 'Vega',
+    name: 'Cinepix',
     color: '#FF6347',
   },
   {

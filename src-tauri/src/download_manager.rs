@@ -389,7 +389,7 @@ mod path_tests {
 
     fn test_root() -> std::path::PathBuf {
         let root = std::env::temp_dir().join(format!(
-            "vega-download-path-{}-{}",
+            "cinepix-download-path-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)

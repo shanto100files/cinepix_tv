@@ -1,14 +1,8 @@
 import { invoke } from "@tauri-apps/api/core";
-import { documentDir, join } from "@tauri-apps/api/path";
-import { settingsStorage } from "../storage";
+import { resolveDownloadBaseDir } from "../downloadLocation";
 import { parseSyncManifest, type VegaSyncManifest } from "./manifest";
 
-export const getDesktopSyncRoot = async (): Promise<string> => {
-  const configured = settingsStorage.getDownloadLocation();
-  return configured === "vega"
-    ? join(await documentDir(), "VegaDownloads")
-    : configured;
-};
+export const getDesktopSyncRoot = resolveDownloadBaseDir;
 
 export const readDesktopSyncManifests = async (
   baseDir: string,

@@ -190,7 +190,7 @@ a {
   border-radius: 8px; /* Safe default, can be overridden by specific components if needed */
 }
 
-.vega-switch.tv-focus {
+.cinepix-switch.tv-focus {
   outline: 3px solid var(--focus-ring);
   outline-offset: 4px;
   transform: none;

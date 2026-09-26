@@ -29,7 +29,7 @@ export function AdBox({ url, height = 120 }: AdBoxProps) {
         }}
         scrolling="no"
         title="Advertisement"
-        sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
       />
     </div>
   );

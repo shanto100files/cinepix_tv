@@ -1,6 +1,5 @@
-![vega-high-resolution-logo-transparent](https://github.com/Zenda-Cross/vega-app/assets/143804558/b2eb446f-8e7f-4800-81e1-3320c82f33de)
+# Cinepix Desktop
 
-# Vega-Desktop
 Native Desktop app for streaming media (Windows, macOS, Linux).
 ### Features
 - Bring your own sources.
@@ -11,28 +10,18 @@ Native Desktop app for streaming media (Windows, macOS, Linux).
 - Sync with mobile app
 <br>
 
-[![Discord](https://custom-icon-badges.demolab.com/badge/-Join_Discord-6567a5?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/cr42m6maWy)
+## Download
 
-___
+[![Download Installers](https://custom-icon-badges.demolab.com/badge/-Download_From_Github-black?style=for-the-badge&logo=download&logoColor=white)](https://github.com/shanto100files/cinepix_tv/releases/latest)
 
-## Download ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/vega-org/vega-desktop/total?link=https%3A%2F%2Fgithub.com%2Fvega-org%2Fvega-desktop%2Freleases&label=Github%20Downloads)
-
-<a href="https://apps.microsoft.com/detail/9n3fdt30wdlb?referrer=appbadge&mode=full" target="_blank"  rel="noopener noreferrer">
-	<img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200"/>
-</a>
-
-[![Download Installers](https://custom-icon-badges.demolab.com/badge/-Download_From_Github-black?style=for-the-badge&logo=download&logoColor=white)](https://github.com/vega-org/vega-desktop/releases/latest)
-
-## Vega for Mobile
-https://github.com/vega-org/vega-app
-
+## Cinepix for Mobile
+https://github.com/shanto100files/CineBD
 
 <br>
 
 ## Add Provider source
 > [!TIP]
-> Follow the guide here https://vega.8man.in/guide/adding-providers/
-
+> Install provider sources from any GitHub repository that follows the provider dist format.
 
 
 ### Sreenshots
@@ -40,7 +29,7 @@ https://github.com/vega-org/vega-app
 <details>
   <summary>More</summary>
   <img width="853" height="445" alt="Screenshot 2026-06-26 113245" src="https://github.com/user-attachments/assets/28e7a630-a822-4dc5-9a26-f102ac3b0240" />
-  <img width="853" height="444" alt="Screenshot 2026-06-26 113101" src="https://github.com/user-attachments/assets/43f2119a-b61c-498e-8421-00cd9ca8f3da" />
+  <img width="853" height="444" alt="Screenshot 2026-06-26 113101" src="https://github.com/user-attachments/assets/28e7a630-a822-4dc5-9a26-f102ac3b0240" />
   <img width="2042" height="1087" alt="Screenshot 2026-06-26 112352" src="https://github.com/user-attachments/assets/ad8692ac-d9ed-4784-b4e1-3243cd16d966" />
 
 </details>
@@ -55,7 +44,7 @@ ___
 [![React](https://custom-icon-badges.demolab.com/badge/-React-287aad?style=for-the-badge&logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://custom-icon-badges.demolab.com/badge/Typescript-3078C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://custom-icon-badges.demolab.com/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Zustand](https://custom-icon-badges.demolab.com/badge/Zustand-443E38?style=for-the-badge&logo=react&logoColor=white)](https://zustand-demo.pmnd.rs/)
+[![Zustand](https://custom-icon-badges.demolab.com/badge/Zustand-443E38?style=for-the-badge&logo=zustand&logoColor=white)](https://zustand-demo.pmnd.rs/)
 
 </p>
 
@@ -64,8 +53,8 @@ ___
 
 1. clone
      ```bash
-     git clone https://github.com/vega-org/vega-desktop.git
-     cd vega-desktop
+     git clone https://github.com/shanto100files/cinepix_tv.git
+     cd cinepix_tv
      ```
 2. Install
      ```bash
@@ -82,15 +71,4 @@ ___
 
 ---
 > [!IMPORTANT]
-> Vega Desktop does not host, store, or provide any media content. It is not affiliated with or connected to any external providers or extensions. All content accessed through the app is managed and sourced directly by the user via third-party tools or integrations. Vega Desktop has no control over it.
-
-
-## Leave a star if this was helpful
-
-<a href="https://www.star-history.com/?repos=vega-org%2Fvega-desktop&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=vega-org/vega-desktop&type=date&theme=dark&legend=top-left&sealed_token=Mc7MDJCA35XmRx1ycfPVcXq4cnRqiQX_7PruvIWc6XGQhApqIDC79vStshevTXUwV5VoBB63uYI1HQQF2L7zvc4jBzX7NYHYo4k9fW2pPLbuMbk_hfLD_w" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=vega-org/vega-desktop&type=date&legend=top-left&sealed_token=Mc7MDJCA35XmRx1ycfPVcXq4cnRqiQX_7PruvIWc6XGQhApqIDC79vStshevTXUwV5VoBB63uYI1HQQF2L7zvc4jBzX7NYHYo4k9fW2pPLbuMbk_hfLD_w" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=vega-org/vega-desktop&type=date&legend=top-left&sealed_token=Mc7MDJCA35XmRx1ycfPVcXq4cnRqiQX_7PruvIWc6XGQhApqIDC79vStshevTXUwV5VoBB63uYI1HQQF2L7zvc4jBzX7NYHYo4k9fW2pPLbuMbk_hfLD_w" />
- </picture>
-</a>
+> Cinepix Desktop does not host, store, or provide any media content. It is not affiliated with or connected to any external providers or extensions. All content accessed through the app is managed and sourced directly by the user via third-party tools or integrations. Cinepix Desktop has no control over it.

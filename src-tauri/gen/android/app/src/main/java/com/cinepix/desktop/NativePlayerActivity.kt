@@ -88,7 +88,7 @@ class NativePlayerActivity : AppCompatActivity() {
                 super.onPlayerError(error)
                 val msg = "ExoPlayer Error: ${error.errorCodeName} - ${error.message}"
                 android.widget.Toast.makeText(this@NativePlayerActivity, msg, android.widget.Toast.LENGTH_LONG).show()
-                android.util.Log.e("VegaNativePlayer", msg, error)
+                android.util.Log.e("CinepixNativePlayer", msg, error)
             }
         })
 

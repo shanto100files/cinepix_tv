@@ -2,8 +2,9 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
-import { documentDir, join } from "@tauri-apps/api/path";
+import { join } from "@tauri-apps/api/path";
 import { settingsStorage } from "../storage/SettingsStorage";
+import { resolveDownloadBaseDir } from "../downloadLocation";
 import type { SkipInterval } from "../providers/types";
 
 export interface DownloadItem {
@@ -93,12 +94,7 @@ interface DownloadState {
   markError: (id: string, error?: string) => void;
 }
 
-const getDownloadBaseDir = async () => {
-  const configured = settingsStorage.getDownloadLocation();
-  return configured === "vega"
-    ? join(await documentDir(), "VegaDownloads")
-    : configured;
-};
+const getDownloadBaseDir = resolveDownloadBaseDir;
 
 const ACTIVE_DOWNLOAD_STATUSES = new Set(["downloading"]);
 

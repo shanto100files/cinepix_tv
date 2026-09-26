@@ -654,7 +654,7 @@ fn diagnose_mpv_initialization(
             "disabled"
         };
         let system_details = format!(
-            "System details:\nVega: {app_version}\nWindows: {}\nProcess architecture: {process_architecture}\nOS architecture: {os_architecture}\nCPU: {cpu}\nInstallation: {}\nHardware acceleration: {hardware_acceleration}",
+            "System details:\nCinepix: {app_version}\nWindows: {}\nProcess architecture: {process_architecture}\nOS architecture: {os_architecture}\nCPU: {cpu}\nInstallation: {}\nHardware acceleration: {hardware_acceleration}",
             windows_version(),
             package_identity(),
         );
@@ -671,7 +671,7 @@ fn diagnose_mpv_initialization(
             .and_then(|path| path.parent().map(|parent| parent.to_path_buf()))
         {
             Some(path) => path,
-            None => finish!("Could not resolve Vega's installation directory."),
+            None => finish!("Could not resolve Cinepix's installation directory."),
         };
         let candidates = [
             exe_dir.join("lib").join("libmpv-2.dll"),
@@ -742,7 +742,7 @@ fn diagnose_mpv_initialization(
             return report("libmpv loaded, but mpv_create() returned null (usually an allocation or broken-runtime failure).".to_string());
         }
 
-        let client_name = CString::new("vega-diagnostic").expect("static string is valid");
+        let client_name = CString::new("cinepix-diagnostic").expect("static string is valid");
         let client = unsafe { mpv_create_client(handle, client_name.as_ptr()) };
         if client.is_null() {
             unsafe { mpv_terminate_destroy(handle) };
@@ -878,7 +878,7 @@ pub fn run() {
                 .path()
                 .app_cache_dir()
                 .unwrap_or_else(|_| std::env::temp_dir())
-                .join("vega-torrents");
+                .join("cinepix-torrents");
             let torrent_state = tauri::async_runtime::block_on(async {
                 match torrent::TorrentState::new(torrent_cache_dir).await {
                     Ok(state) => Some(state),
