@@ -58,10 +58,11 @@ const useAuthStore = create<AuthState>((set, get) => ({
   login: async (username, password) => {
     try {
       const deviceId = getDeviceId();
+      const isTv = navigator.userAgent.toLowerCase().includes('android');
       const res = await fetch(`${API_BASE}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-App-Key': HARDCODED_KEY },
-        body: JSON.stringify({ username, password, device_id: deviceId, app_version: '5.6.0' }),
+        body: JSON.stringify({ username, password, device_id: deviceId, app_version: '5.7.3', device_type: isTv ? 'tv' : 'desktop' }),
       });
       const data = await res.json();
       if (data.token) {

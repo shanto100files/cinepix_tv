@@ -1,16 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LuBlocks as Blocks, LuChevronDown as ChevronDown, LuCheck as Check } from 'react-icons/lu';
+import { LuBlocks as Blocks, LuChevronDown as ChevronDown, LuCheck as Check, LuLock as Lock } from 'react-icons/lu';
+import { useNavigate } from 'react-router-dom';
 import useContentStore from '../../lib/zustand/contentStore';
 import useAuthStore from '../../lib/zustand/authStore';
 import { FocusableButton } from './FocusableButton';
 import { settingsStorage } from '../../lib/storage';
+import { toast } from '../../lib/zustand/toastStore';
 import './ProviderSwitcher.css';
 
 export const ProviderSwitcher: React.FC = () => {
   const { installedProviders, provider: activeProvider, setProvider } = useContentStore();
   const isAdmin = useAuthStore((s) => s.user?.is_admin);
+  const isPremium = useAuthStore((s) => s.isPremium);
+  const token = useAuthStore((s) => s.token);
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Provider switching is an entitled action: premium or admin. Everyone
+  // sees the switcher (locked) so the feature is discoverable.
+  const canSwitch = !!isPremium || !!isAdmin;
 
   // 18+ providers stay out of the switcher unless the age gate is on.
   const adultAllowed = settingsStorage.isAdultEnabled();
@@ -28,11 +37,22 @@ export const ProviderSwitcher: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  if (!isAdmin || !visibleProviders || visibleProviders.length === 0) {
+  if (!visibleProviders || visibleProviders.length === 0) {
     return null;
   }
 
   const handleSelect = (provider: any) => {
+    if (!canSwitch) {
+      if (!token) {
+        toast({ type: 'warning', title: 'লগইন করুন', message: 'Provider পরিবর্তন করতে আগে লগইন করুন।' });
+        navigate('/login');
+      } else {
+        toast({ type: 'warning', title: 'প্রিমিয়াম প্রয়োজন', message: 'Provider পরিবর্তন করতে Premium নিন অথবা admin-এর সাথে যোগাযোগ করুন।' });
+        navigate('/premium');
+      }
+      setIsOpen(false);
+      return;
+    }
     setProvider(provider);
     setIsOpen(false);
   };
@@ -69,6 +89,7 @@ export const ProviderSwitcher: React.FC = () => {
               {activeProvider?.value === provider.value && (
                 <Check size={16} className="text-primary" />
               )}
+              {!canSwitch && <Lock size={14} style={{ opacity: 0.6 }} />}
             </FocusableButton>
           ))}
         </div>

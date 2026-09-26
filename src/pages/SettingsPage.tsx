@@ -17,12 +17,12 @@ import {
   LuShieldCheck as Shield,
   LuZap as Zap,
   LuEyeOff as EyeOff,
-} from "react-icons/lu";
-import { PlayerSettings } from "../components/settings/PlayerSettings";
+} from "react-icons/lu";import { PlayerSettings } from "../components/settings/PlayerSettings";
 import { SubtitleSettings } from "../components/settings/SubtitleSettings";
 import { PreferencesSettings } from "../components/settings/PreferencesSettings";
 
 import { checkAppUpdates } from "../lib/hooks/useAppUpdater";
+import { redeemCoupon } from "../lib/services/entitlementService";
 import { FocusableButton } from "../components/layout/FocusableButton";
 import { Switch } from "../components/ui/switch";
 import { settingsStorage } from "../lib/storage";
@@ -56,6 +56,8 @@ export const SettingsPage: React.FC = () => {
   const [adultEnabled, setAdultEnabled] = React.useState(() =>
     settingsStorage.isAdultEnabled(),
   );
+  const [couponCode, setCouponCode] = React.useState("");
+  const [redeeming, setRedeeming] = React.useState(false);
   const user = useAuthStore((s) => s.user);
   const isPremium = useAuthStore((s) => s.isPremium);
   const logout = useAuthStore((s) => s.logout);
@@ -287,6 +289,60 @@ export const SettingsPage: React.FC = () => {
               >
                 {adultEnabled ? "Enabled" : "Disabled"}
               </FocusableButton>
+            </div>
+          </div>
+        </section>
+
+        {/* Trial Coupon Group */}
+        <section className="settings-group">
+          <h2
+            className="title-md flex items-center gap-2"
+            style={{ marginBottom: "8px" }}
+          >
+            <Zap size={20} /> ট্রায়াল / কুপন কোড
+          </h2>
+          <div className="settings-card">
+            <div className="settings-row" style={{ flexDirection: "column", alignItems: "stretch", gap: 10 }}>
+              <div className="settings-info">
+                <h3 className="label-lg">Provider আনলক কুপন</h3>
+                <p className="body-md text-muted">
+                  অ্যাডমিন দেওয়া কোড দিলে নির্দিষ্ট provider কয়েকদিনের জন্য আনলক হবে (লগইন প্রয়োজন)।
+                </p>
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <input
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  placeholder="যেমন: CINEPIX-TRIAL7"
+                  style={{
+                    flex: 1,
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.14)",
+                    borderRadius: 8,
+                    padding: "8px 12px",
+                    color: "inherit",
+                    fontSize: 14,
+                  }}
+                />
+                <FocusableButton
+                  className="theme-toggle-btn"
+                  disabled={redeeming || !couponCode.trim()}
+                  onClick={async () => {
+                    setRedeeming(true);
+                    const result = await redeemCoupon(couponCode.trim());
+                    setRedeeming(false);
+                    if (result.ok) {
+                      setCouponCode("");
+                      window.alert(`কুপন সফল! ${(result.providers || []).join(", ")} — ${result.days} দিনের জন্য আনলক হয়েছে। অ্যাপ রিস্টার্ট করলে কাজ করবে।`);
+                    } else {
+                      window.alert(result.msg || "কুপন সঠিক নয়");
+                    }
+                  }}
+                  style={{ padding: "8px 16px", opacity: redeeming || !couponCode.trim() ? 0.5 : 1 }}
+                >
+                  {redeeming ? "যাচাই হচ্ছে…" : "আনলক"}
+                </FocusableButton>
+              </div>
             </div>
           </div>
         </section>

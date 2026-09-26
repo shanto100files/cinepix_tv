@@ -13,6 +13,7 @@ import { WafDialog } from "./components/WafDialog";
 import useThemeStore from "./lib/zustand/themeStore";
 import { settingsStorage } from "./lib/storage";
 import { useAppUpdater } from "./lib/hooks/useAppUpdater";
+import { syncAccountEntitlements } from "./lib/services/entitlementService";
 import { initDownloadListeners } from "./lib/zustand/downloadStore";
 import { DownloadsPage } from "./pages/DownloadsPage";
 import { DownloadsSeriesPage } from "./pages/DownloadsSeriesPage";
@@ -93,6 +94,9 @@ export default function App() {
 
   useEffect(() => {
     loadToken();
+    // Account-level entitlements (provider allow-list, TV 18+ flag) after
+    // the auth state is restored.
+    syncAccountEntitlements().catch(() => {});
     if (useAuthStore.getState().token) {
       refreshProfile();
     }
