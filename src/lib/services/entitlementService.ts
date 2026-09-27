@@ -5,6 +5,14 @@ import { settingsStorage } from '../storage/SettingsStorage';
 
 const API_BASE = 'https://cinepix.top/api/app';
 
+/** Keep ExtensionManager's runtime guard in sync with the server allow-list. */
+async function setEntitlementCache(allowed: string[] | null): Promise<void> {
+  try {
+    const { extensionManager } = await import('./ExtensionManager');
+    extensionManager.entitlementCache = allowed;
+  } catch {}
+}
+
 export interface ProviderUnlock {
   value: string;
   coupon_expires_at?: string | null;
@@ -31,14 +39,19 @@ export async function fetchMyProviders(): Promise<{
   allowed: string[] | null;
   unlocks: Record<string, { until: number; days: number }>;
 }> {
-  const token = useAuthStore.getState().token;
-  if (!token) return { allowed: null, unlocks: {} };
+  const auth = useAuthStore.getState();
+  if (!auth.token) return { allowed: null, unlocks: {} };
+  // Admins see everything, including `selected` providers.
+  if (auth.user?.is_admin) return { allowed: null, unlocks: {} };
   try {
     const res = await axios.get<MyProvidersResponse>(`${API_BASE}/myproviders`, {
-      headers: { Authorization: `Bearer ${token}`, 'X-App-Key': HARDCODED_KILL_KEY },
+      headers: { Authorization: `Bearer ${auth.token}`, 'X-App-Key': HARDCODED_KILL_KEY },
       timeout: 10000,
     });
-    if (res.data.all) return { allowed: null, unlocks: {} };
+    if (res.data.all) {
+      await setEntitlementCache(null);
+      return { allowed: null, unlocks: {} };
+    }
     const unlocks: Record<string, { until: number; days: number }> = {};
     const allowed: string[] = [];
     for (const p of res.data.providers || []) {
@@ -50,6 +63,7 @@ export async function fetchMyProviders(): Promise<{
         }
       }
     }
+    await setEntitlementCache(allowed);
     return { allowed, unlocks };
   } catch {
     return { allowed: null, unlocks: {} };
@@ -93,6 +107,33 @@ export async function syncAccountEntitlements(): Promise<void> {
       const gated = installed.filter((p: any) => allowed.includes(p.value));
       if (gated.length > 0) {
         store.setState({ installedProviders: gated });
+      }
+    }
+  } catch {
+    // best-effort
+  }
+
+  // Mirror mobile: logged-out devices must not keep admin-grant (`selected`)
+  // providers installed — uninstall them so the UI never shows stale entries.
+  try {
+    const auth = useAuthStore.getState();
+    if (!auth.token || auth.user?.is_admin) return;
+    const { allowed } = await fetchMyProviders();
+    if (!allowed) return;
+    const { extensionManager } = await import('./ExtensionManager');
+    const { extensionStorage } = await import('../storage/extensionStorage');
+    for (const p of extensionStorage.getInstalledProviders()) {
+      const available = extensionStorage
+        .getAvailableProviders(p.source?.author || '')
+        .find((a: any) => a.value === p.value);
+      const isSelected = available
+        ? available.access_mode === 'selected'
+        : false;
+      if (isSelected && !allowed.includes(p.value)) {
+        try {
+          extensionManager.uninstallProvider(p.value, p.source?.author);
+          console.log(`Removed not-entitled selected provider: ${p.value}`);
+        } catch {}
       }
     }
   } catch {

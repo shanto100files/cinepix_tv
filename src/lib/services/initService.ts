@@ -80,6 +80,19 @@ export async function initializeApp(onProgress: (p: InitProgress) => void): Prom
       return { forceUpdate: true };
     }
 
+    // Entitlements BEFORE manifest: the signed-in account's allow-list must
+    // reach the server with the manifest request, so admin-granted
+    // (`selected`) providers are included/excluded correctly per account.
+    try {
+      const { syncAccountEntitlements } = await import('./entitlementService');
+      await Promise.race([
+        syncAccountEntitlements(),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('entitlement timeout')), 8000)),
+      ]);
+    } catch (e: any) {
+      console.warn('Entitlement sync:', e?.message || e);
+    }
+
     onProgress({ progress: 70, status: 'Loading providers...' });
     try {
       const { extensionManager } = await import('./ExtensionManager');

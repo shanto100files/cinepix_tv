@@ -1,5 +1,7 @@
 import axios from "axios";
 import { tauriAxiosAdapter } from "../providers/tauriAxiosAdapter";
+import useAuthStore from "../zustand/authStore";
+import { HARDCODED_KILL_KEY } from "./initService";
 import {
   extensionStorage,
   ProviderExtension,
@@ -38,6 +40,8 @@ export class ExtensionManager {
 
   private testMode = false;
   private baseUrlTestMode = "http://localhost:3001";
+  /** Cached entitlement allow-list (null = open/anonymous). Kept fresh by entitlementService. */
+  entitlementCache: string[] | null = null;
 
   private getManifest = (url: string) => {
     return `${url}/manifest.json`;
@@ -146,9 +150,16 @@ export class ExtensionManager {
         ? `${manifestBase}${manifestBase.includes("?") ? "&" : "?"}t=${Date.now()}`
         : manifestBase;
       console.log("Fetching manifest from:", manifestUrl);
+      // Signed-in callers must present their token so the server can filter
+      // admin-grant (`selected`) providers per account in the manifest.
+      const token = useAuthStore.getState().token;
       const response = await axios.get(manifestUrl, {
         timeout: 10000,
         adapter: tauriAxiosAdapter,
+        headers: {
+          "X-App-Key": HARDCODED_KILL_KEY,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
       });
 
       if (!response.data || !Array.isArray(response.data)) {
@@ -214,9 +225,15 @@ export class ExtensionManager {
             : `${sourceUrl}/dist/${providerValue}/${fileName}.js?t=${Date.now()}`;
           console.log(`Downloading: ${url}`);
 
+          // Selected providers serve modules only to entitled accounts.
+          const token = useAuthStore.getState().token;
           const response = await axios.get(url, {
             timeout: 15000,
             adapter: tauriAxiosAdapter,
+            headers: {
+              "X-App-Key": HARDCODED_KILL_KEY,
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
           });
 
           if (response.data) {
@@ -441,7 +458,27 @@ export class ExtensionManager {
     sourceAuthor?: string,
   ): Promise<ProviderModule | undefined> {
     if (!this.testMode) {
-      return extensionStorage.getProviderModules(providerValue, sourceAuthor);
+      const cached = extensionStorage.getProviderModules(providerValue, sourceAuthor);
+      if (cached) {
+        // Selected-provider guard: modules for admin-grant providers may not
+        // be runnable on this device (install is entitlement-gated already;
+        // this protects stale caches from pre-gate installs).
+        const source = this.getActiveSource(sourceAuthor ? ({author: sourceAuthor, url: ''} as any) : undefined);
+        const available = source
+          ? extensionStorage.getAvailableProviders(source.author)
+          : [];
+        const meta = available.find((p: any) => p.value === providerValue);
+        if (meta && (meta as any).access_mode === 'selected') {
+          const auth = useAuthStore.getState();
+          const isAdmin = !!auth.user?.is_admin;
+          const allowed = this.entitlementCache;
+          if (!isAdmin && allowed !== null && !allowed.includes(providerValue)) {
+            console.warn(`Blocking module use of not-entitled selected provider: ${providerValue}`);
+            return undefined;
+          }
+        }
+      }
+      return cached;
     }
 
     const activeDownload = this.testModuleDownloads.get(providerValue);

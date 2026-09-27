@@ -102,6 +102,10 @@ const useAuthStore = create<AuthState>((set, get) => ({
     mainStorage.delete('auth_token');
     mainStorage.delete('auth_user');
     set({ token: null, user: null, isPremium: false });
+    // Drop entitlements + re-sync (removes selected providers, refreshes manifest view).
+    import('../services/entitlementService').then(({ syncAccountEntitlements }) =>
+      syncAccountEntitlements().catch(() => {}),
+    );
   },
 
   refreshProfile: async () => {
